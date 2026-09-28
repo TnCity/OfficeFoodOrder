@@ -7,7 +7,6 @@ namespace OfficeBite.Mobile.Views;
 public partial class AdminDashboardPage : ContentPage
 {
     private readonly ApiService _apiService;
-    private static readonly string[] Statuses = { "Confirmed", "Preparing", "Ready", "Completed", "Cancelled" };
 
     public AdminDashboardPage(ApiService apiService)
     {
@@ -42,63 +41,9 @@ public partial class AdminDashboardPage : ContentPage
                 TotalOrdersLabel.Text = summary.TotalOrders.ToString();
                 TotalAmountLabel.Text = summary.TotalDisplay;
                 PendingLabel.Text     = summary.PendingOrders.ToString();
-                CompletedLabel.Text   = summary.CompletedOrders.ToString();
-                PreparingLabel.Text   = summary.PreparingOrders.ToString();
-                ReadyLabel.Text       = summary.ReadyOrders.ToString();
-
-                FoodSummaryStack.Children.Clear();
-
-                if (summary.FoodSummary.Count == 0)
-                {
-                    FoodSummaryStack.Children.Add(new Label
-                    {
-                        Text = "No orders yet",
-                        FontSize = 14,
-                        TextColor = Color.FromArgb("#9CA3AF"),
-                        HorizontalOptions = LayoutOptions.Center
-                    });
-                }
-                else
-                {
-                    foreach (var food in summary.FoodSummary)
-                    {
-                        var row = new Grid();
-                        row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Star });
-                        row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-
-                        var nameLabel = new Label
-                        {
-                            Text = food.FoodName,
-                            FontSize = 14,
-                            TextColor = Color.FromArgb("#374151"),
-                            VerticalOptions = LayoutOptions.Center
-                        };
-
-                        var qtyBorder = new Border
-                        {
-                            BackgroundColor = Color.FromArgb("#EDE9FE"),
-                            StrokeThickness = 0,
-                            Padding = new Thickness(10, 4),
-                            Content = new Label
-                            {
-                                Text = $"x {food.TotalQuantity}",
-                                FontSize = 13,
-                                FontAttributes = FontAttributes.Bold,
-                                TextColor = Color.FromArgb("#7C3AED")
-                            }
-                        };
-                        qtyBorder.StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle
-                        {
-                            CornerRadius = new CornerRadius(20)
-                        };
-
-                        Grid.SetColumn(nameLabel, 0);
-                        Grid.SetColumn(qtyBorder, 1);
-                        row.Children.Add(nameLabel);
-                        row.Children.Add(qtyBorder);
-                        FoodSummaryStack.Children.Add(row);
-                    }
-                }
+                ConfirmedLabel.Text   = summary.ConfirmedOrders.ToString();
+                DeliveredLabel.Text   = summary.DeliveredOrders.ToString();
+                CancelledLabel.Text   = summary.CancelledOrders.ToString();
             }
 
             // Load today's live orders list
@@ -266,72 +211,140 @@ public partial class AdminDashboardPage : ContentPage
             stack.Children.Add(noteBorder);
         }
 
-        // Status update buttons if not finished
-        if (order.Status != "Completed" && order.Status != "Cancelled")
+        // Action Buttons according to workflow
+        if (order.Status == "Pending")
         {
             stack.Children.Add(new BoxView { HeightRequest = 1, BackgroundColor = Color.FromArgb("#F1F5F9"), Margin = new Thickness(0, 4) });
 
-            var btnRow = new FlexLayout { Wrap = Microsoft.Maui.Layouts.FlexWrap.Wrap };
-            foreach (var status in Statuses)
+            var btnGrid = new Grid
             {
-                if (status == order.Status) continue;
-
-                var btn = new Button
+                ColumnDefinitions =
                 {
-                    Text = status,
-                    FontSize = 12,
-                    FontAttributes = FontAttributes.Bold,
-                    HeightRequest = 32,
-                    CornerRadius = 8,
-                    Margin = new Thickness(0, 0, 6, 6),
-                    Padding = new Thickness(10, 0),
-                    BackgroundColor = GetStatusBtnColor(status),
-                    TextColor = Colors.White
-                };
-                var capturedStatus = status;
-                btn.Clicked += async (s, e) =>
-                {
-                    bool confirm = await DisplayAlert("Update Order Status",
-                        $"Change {order.UserName}'s order to '{capturedStatus}'?", "Yes", "No");
-                    if (!confirm) return;
+                    new ColumnDefinition { Width = GridLength.Star },
+                    new ColumnDefinition { Width = GridLength.Auto }
+                },
+                ColumnSpacing = 8
+            };
 
-                    var (success, message) = await _apiService.UpdateOrderStatusAsync(order.OrderId, capturedStatus);
-                    if (success)
-                    {
-                        await LoadSummaryAsync();
-                    }
-                    else
-                    {
-                        await DisplayAlert("Error", message, "OK");
-                    }
-                };
-                btnRow.Children.Add(btn);
-            }
-            stack.Children.Add(btnRow);
+            var confirmBtn = new Button
+            {
+                Text = "✔️ Confirm Order",
+                FontSize = 13,
+                FontAttributes = FontAttributes.Bold,
+                HeightRequest = 38,
+                CornerRadius = 10,
+                BackgroundColor = Color.FromArgb("#2563EB"),
+                TextColor = Colors.White
+            };
+            confirmBtn.Clicked += async (s, e) =>
+            {
+                bool confirm = await DisplayAlert("Confirm Order", $"Confirm {order.UserName}'s order?", "Yes, Confirm", "Cancel");
+                if (!confirm) return;
+
+                var (success, message) = await _apiService.UpdateOrderStatusAsync(order.OrderId, "Confirmed");
+                if (success) await LoadSummaryAsync();
+                else await DisplayAlert("Error", message, "OK");
+            };
+
+            var cancelBtn = new Button
+            {
+                Text = "❌ Cancel",
+                FontSize = 12,
+                FontAttributes = FontAttributes.Bold,
+                HeightRequest = 38,
+                CornerRadius = 10,
+                BackgroundColor = Color.FromArgb("#FEE2E2"),
+                TextColor = Color.FromArgb("#DC2626")
+            };
+            cancelBtn.Clicked += async (s, e) =>
+            {
+                bool confirm = await DisplayAlert("Cancel Order", $"Cancel {order.UserName}'s order?", "Yes, Cancel", "No");
+                if (!confirm) return;
+
+                var (success, message) = await _apiService.UpdateOrderStatusAsync(order.OrderId, "Cancelled");
+                if (success) await LoadSummaryAsync();
+                else await DisplayAlert("Error", message, "OK");
+            };
+
+            Grid.SetColumn(confirmBtn, 0);
+            Grid.SetColumn(cancelBtn, 1);
+            btnGrid.Children.Add(confirmBtn);
+            btnGrid.Children.Add(cancelBtn);
+            stack.Children.Add(btnGrid);
+        }
+        else if (order.Status == "Confirmed")
+        {
+            stack.Children.Add(new BoxView { HeightRequest = 1, BackgroundColor = Color.FromArgb("#F1F5F9"), Margin = new Thickness(0, 4) });
+
+            var btnGrid = new Grid
+            {
+                ColumnDefinitions =
+                {
+                    new ColumnDefinition { Width = GridLength.Star },
+                    new ColumnDefinition { Width = GridLength.Auto }
+                },
+                ColumnSpacing = 8
+            };
+
+            var deliverBtn = new Button
+            {
+                Text = "🚚 Mark Delivered",
+                FontSize = 13,
+                FontAttributes = FontAttributes.Bold,
+                HeightRequest = 38,
+                CornerRadius = 10,
+                BackgroundColor = Color.FromArgb("#059669"),
+                TextColor = Colors.White
+            };
+            deliverBtn.Clicked += async (s, e) =>
+            {
+                bool confirm = await DisplayAlert("Deliver Order", $"Mark {order.UserName}'s order as Delivered to employee?", "Yes, Delivered", "Cancel");
+                if (!confirm) return;
+
+                var (success, message) = await _apiService.UpdateOrderStatusAsync(order.OrderId, "Delivered");
+                if (success) await LoadSummaryAsync();
+                else await DisplayAlert("Error", message, "OK");
+            };
+
+            var cancelBtn = new Button
+            {
+                Text = "❌ Cancel",
+                FontSize = 12,
+                FontAttributes = FontAttributes.Bold,
+                HeightRequest = 38,
+                CornerRadius = 10,
+                BackgroundColor = Color.FromArgb("#FEE2E2"),
+                TextColor = Color.FromArgb("#DC2626")
+            };
+            cancelBtn.Clicked += async (s, e) =>
+            {
+                bool confirm = await DisplayAlert("Cancel Order", $"Cancel {order.UserName}'s order?", "Yes, Cancel", "No");
+                if (!confirm) return;
+
+                var (success, message) = await _apiService.UpdateOrderStatusAsync(order.OrderId, "Cancelled");
+                if (success) await LoadSummaryAsync();
+                else await DisplayAlert("Error", message, "OK");
+            };
+
+            Grid.SetColumn(deliverBtn, 0);
+            Grid.SetColumn(cancelBtn, 1);
+            btnGrid.Children.Add(deliverBtn);
+            btnGrid.Children.Add(cancelBtn);
+            stack.Children.Add(btnGrid);
         }
 
         border.Content = stack;
         return border;
     }
 
-    private static Color GetStatusBtnColor(string status) => status switch
-    {
-        "Confirmed" => Color.FromArgb("#3B82F6"),
-        "Preparing" => Color.FromArgb("#8B5CF6"),
-        "Ready"     => Color.FromArgb("#10B981"),
-        "Completed" => Color.FromArgb("#6B7280"),
-        "Cancelled" => Color.FromArgb("#EF4444"),
-        _           => Color.FromArgb("#9CA3AF")
-    };
-
     private void ResetStats()
     {
         TotalOrdersLabel.Text = "0";
         TotalAmountLabel.Text = "Rs.0";
         PendingLabel.Text     = "0";
-        CompletedLabel.Text   = "0";
-        PreparingLabel.Text   = "0";
-        ReadyLabel.Text       = "0";
+        ConfirmedLabel.Text   = "0";
+        DeliveredLabel.Text   = "0";
+        CancelledLabel.Text   = "0";
         NoLiveOrdersBorder.IsVisible = true;
         LiveOrdersStack.IsVisible    = false;
         LiveOrdersCountLabel.Text    = "0 orders";
@@ -342,6 +355,9 @@ public partial class AdminDashboardPage : ContentPage
 
     private async void ViewOrdersButton_Clicked(object sender, EventArgs e)
         => await Navigation.PushAsync(new TodayOrdersPage(_apiService));
+
+    private async void ManualOrderButton_Clicked(object sender, EventArgs e)
+        => await Navigation.PushAsync(new AdminManualOrderPage(_apiService));
 
     private async void RegisterEmployeeButton_Clicked(object sender, EventArgs e)
         => await Navigation.PushAsync(new RegisterEmployeePage(_apiService));

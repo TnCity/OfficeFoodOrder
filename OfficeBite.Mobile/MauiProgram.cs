@@ -17,11 +17,11 @@ namespace OfficeBite.Mobile
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 });
 
-            // 📡 Local Network IP — phone and PC must be on the same WiFi
-            // PC IP: 192.168.31.74  |  API Port: 5052
+            // 📡 Local Network IP — phone and PC on the same WiFi
+            // PC IP: 192.168.0.134  |  API Port: 5052
             builder.Services.AddSingleton(new HttpClient
             {
-                BaseAddress = new Uri("http://192.168.31.74:5052/"),
+                BaseAddress = new Uri("http://192.168.0.134:5052/"),
                 Timeout     = TimeSpan.FromSeconds(30)
             });
 
@@ -36,6 +36,7 @@ namespace OfficeBite.Mobile
             builder.Services.AddTransient<AdminDashboardPage>();
             builder.Services.AddTransient<CreateMenuPage>();
             builder.Services.AddTransient<TodayOrdersPage>();
+            builder.Services.AddTransient<AdminManualOrderPage>();
             builder.Services.AddTransient<RegisterEmployeePage>();
 
 #if DEBUG

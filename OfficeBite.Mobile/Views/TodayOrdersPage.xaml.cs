@@ -6,7 +6,6 @@ namespace OfficeBite.Mobile.Views;
 public partial class TodayOrdersPage : ContentPage
 {
     private readonly ApiService _apiService;
-    private static readonly string[] Statuses = { "Confirmed", "Preparing", "Ready", "Completed", "Cancelled" };
 
     public TodayOrdersPage(ApiService apiService)
     {
@@ -125,45 +124,121 @@ public partial class TodayOrdersPage : ContentPage
 
         stack.Children.Add(new BoxView { HeightRequest = 1, BackgroundColor = Color.FromArgb("#E5E7EB") });
 
-        // Status update buttons
-        if (order.Status != "Completed" && order.Status != "Cancelled")
+        // Action Buttons according to workflow: Pending -> Confirmed -> Delivered (or Cancelled)
+        if (order.Status == "Pending")
         {
-            var btnRow = new FlexLayout { Wrap = Microsoft.Maui.Layouts.FlexWrap.Wrap };
-            foreach (var status in Statuses)
+            var btnGrid = new Grid
             {
-                if (status == order.Status) continue;
-                var btn = new Button
+                ColumnDefinitions =
                 {
-                    Text = status, FontSize = 12, FontAttributes = FontAttributes.Bold,
-                    HeightRequest = 36, CornerRadius = 10, Margin = new Thickness(0, 0, 6, 6),
-                    BackgroundColor = GetStatusBtnColor(status), TextColor = Colors.White
-                };
-                var capturedStatus = status;
-                btn.Clicked += async (s, e) =>
+                    new ColumnDefinition { Width = GridLength.Star },
+                    new ColumnDefinition { Width = GridLength.Auto }
+                },
+                ColumnSpacing = 8
+            };
+
+            var confirmBtn = new Button
+            {
+                Text = "✔️ Confirm Order",
+                FontSize = 13,
+                FontAttributes = FontAttributes.Bold,
+                HeightRequest = 38,
+                CornerRadius = 10,
+                BackgroundColor = Color.FromArgb("#2563EB"),
+                TextColor = Colors.White
+            };
+            confirmBtn.Clicked += async (s, e) =>
+            {
+                bool confirm = await DisplayAlert("Confirm Order", $"Confirm {order.UserName}'s order?", "Yes, Confirm", "Cancel");
+                if (!confirm) return;
+                var (success, message) = await _apiService.UpdateOrderStatusAsync(order.OrderId, "Confirmed");
+                if (success) await LoadOrdersAsync();
+                else await DisplayAlert("Error", message, "OK");
+            };
+
+            var cancelBtn = new Button
+            {
+                Text = "❌ Cancel",
+                FontSize = 12,
+                FontAttributes = FontAttributes.Bold,
+                HeightRequest = 38,
+                CornerRadius = 10,
+                BackgroundColor = Color.FromArgb("#FEE2E2"),
+                TextColor = Color.FromArgb("#DC2626")
+            };
+            cancelBtn.Clicked += async (s, e) =>
+            {
+                bool confirm = await DisplayAlert("Cancel Order", $"Cancel {order.UserName}'s order?", "Yes, Cancel", "No");
+                if (!confirm) return;
+                var (success, message) = await _apiService.UpdateOrderStatusAsync(order.OrderId, "Cancelled");
+                if (success) await LoadOrdersAsync();
+                else await DisplayAlert("Error", message, "OK");
+            };
+
+            Grid.SetColumn(confirmBtn, 0);
+            Grid.SetColumn(cancelBtn, 1);
+            btnGrid.Children.Add(confirmBtn);
+            btnGrid.Children.Add(cancelBtn);
+            stack.Children.Add(btnGrid);
+        }
+        else if (order.Status == "Confirmed")
+        {
+            var btnGrid = new Grid
+            {
+                ColumnDefinitions =
                 {
-                    bool confirm = await DisplayAlert("Update Status",
-                        $"Change {order.UserName}'s order to '{capturedStatus}'?", "Yes", "No");
-                    if (!confirm) return;
-                    var (success, message) = await _apiService.UpdateOrderStatusAsync(order.OrderId, capturedStatus);
-                    if (success) await LoadOrdersAsync();
-                    else await DisplayAlert("Error", message, "OK");
-                };
-                btnRow.Children.Add(btn);
-            }
-            stack.Children.Add(btnRow);
+                    new ColumnDefinition { Width = GridLength.Star },
+                    new ColumnDefinition { Width = GridLength.Auto }
+                },
+                ColumnSpacing = 8
+            };
+
+            var deliverBtn = new Button
+            {
+                Text = "🚚 Mark Delivered",
+                FontSize = 13,
+                FontAttributes = FontAttributes.Bold,
+                HeightRequest = 38,
+                CornerRadius = 10,
+                BackgroundColor = Color.FromArgb("#059669"),
+                TextColor = Colors.White
+            };
+            deliverBtn.Clicked += async (s, e) =>
+            {
+                bool confirm = await DisplayAlert("Deliver Order", $"Mark {order.UserName}'s order as Delivered to employee?", "Yes, Delivered", "Cancel");
+                if (!confirm) return;
+                var (success, message) = await _apiService.UpdateOrderStatusAsync(order.OrderId, "Delivered");
+                if (success) await LoadOrdersAsync();
+                else await DisplayAlert("Error", message, "OK");
+            };
+
+            var cancelBtn = new Button
+            {
+                Text = "❌ Cancel",
+                FontSize = 12,
+                FontAttributes = FontAttributes.Bold,
+                HeightRequest = 38,
+                CornerRadius = 10,
+                BackgroundColor = Color.FromArgb("#FEE2E2"),
+                TextColor = Color.FromArgb("#DC2626")
+            };
+            cancelBtn.Clicked += async (s, e) =>
+            {
+                bool confirm = await DisplayAlert("Cancel Order", $"Cancel {order.UserName}'s order?", "Yes, Cancel", "No");
+                if (!confirm) return;
+                var (success, message) = await _apiService.UpdateOrderStatusAsync(order.OrderId, "Cancelled");
+                if (success) await LoadOrdersAsync();
+                else await DisplayAlert("Error", message, "OK");
+            };
+
+            Grid.SetColumn(deliverBtn, 0);
+            Grid.SetColumn(cancelBtn, 1);
+            btnGrid.Children.Add(deliverBtn);
+            btnGrid.Children.Add(cancelBtn);
+            stack.Children.Add(btnGrid);
         }
 
         border.Content = stack;
         return border;
     }
-
-    private static Color GetStatusBtnColor(string status) => status switch
-    {
-        "Confirmed" => Color.FromArgb("#3B82F6"),
-        "Preparing" => Color.FromArgb("#8B5CF6"),
-        "Ready"     => Color.FromArgb("#10B981"),
-        "Completed" => Color.FromArgb("#6B7280"),
-        "Cancelled" => Color.FromArgb("#EF4444"),
-        _           => Color.FromArgb("#9CA3AF")
-    };
 }

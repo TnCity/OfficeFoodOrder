@@ -78,6 +78,25 @@ public partial class EmployeeDashboardPage : ContentPage
                     itemDescriptions.Add($"📝 Note: \"{todayOrder.SpecialInstructions}\"");
                 }
                 MyOrderDetailsLabel.Text = string.Join("\n", itemDescriptions);
+
+                MyOrderStatusNoteLabel.Text = todayOrder.Status switch
+                {
+                    "Pending"   => "⏳ Order placed! Awaiting Admin confirmation...",
+                    "Confirmed" => "👨‍🍳 Order confirmed by Admin! Food will be brought soon.",
+                    "Delivered" => "🎉 Order delivered! Enjoy your lunch!",
+                    "Completed" => "🎉 Order delivered! Enjoy your lunch!",
+                    "Cancelled" => "❌ This order was cancelled.",
+                    _           => "Order status updated."
+                };
+                MyOrderStatusNoteLabel.TextColor = todayOrder.Status switch
+                {
+                    "Pending"   => Color.FromArgb("#B45309"),
+                    "Confirmed" => Color.FromArgb("#1D4ED8"),
+                    "Delivered" => Color.FromArgb("#15803D"),
+                    "Completed" => Color.FromArgb("#15803D"),
+                    "Cancelled" => Color.FromArgb("#DC2626"),
+                    _           => Color.FromArgb("#475569")
+                };
             }
             else
             {

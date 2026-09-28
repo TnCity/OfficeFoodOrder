@@ -179,14 +179,8 @@ public class OrderService
             ConfirmedOrders = orders.Count(
                 x => x.Status == "Confirmed"),
 
-            PreparingOrders = orders.Count(
-                x => x.Status == "Preparing"),
-
-            ReadyOrders = orders.Count(
-                x => x.Status == "Ready"),
-
-            CompletedOrders = orders.Count(
-                x => x.Status == "Completed"),
+            DeliveredOrders = orders.Count(
+                x => x.Status == "Delivered" || x.Status == "Completed" || x.Status == "Ready"),
 
             CancelledOrders = orders.Count(
                 x => x.Status == "Cancelled"),
@@ -298,8 +292,7 @@ public class OrderService
         {
             "Pending",
             "Confirmed",
-            "Preparing",
-            "Ready",
+            "Delivered",
             "Completed",
             "Cancelled"
         };

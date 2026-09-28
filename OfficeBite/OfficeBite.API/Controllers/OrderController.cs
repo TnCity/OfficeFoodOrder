@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OfficeBite.BLL.Services;
@@ -207,5 +207,54 @@ public class OrderController : ControllerBase
             await _orderService.GetTodaySummaryAsync();
 
         return Ok(summary);
+    }
+
+    // ==========================================
+    // ADMIN - CREATE MANUAL ORDER FOR EMPLOYEE
+    // ==========================================
+
+    [Authorize(Roles = "Admin")]
+    [HttpPost("admin/manual")]
+    public async Task<IActionResult> CreateManualOrder(
+        AdminCreateOrderRequest request)
+    {
+        try
+        {
+            if (request.UserId <= 0)
+            {
+                return BadRequest(new
+                {
+                    message = "Please select an employee."
+                });
+            }
+
+            var createRequest = new CreateOrderRequest
+            {
+                MenuId = request.MenuId,
+                SpecialInstructions = request.SpecialInstructions,
+                Items = request.Items
+            };
+
+            var order =
+                await _orderService.CreateOrderAsync(
+                    request.UserId,
+                    createRequest);
+
+            return Ok(order);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new
+            {
+                message = ex.Message
+            });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(new
+            {
+                message = ex.Message
+            });
+        }
     }
 }
