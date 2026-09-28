@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="OfficeBite.Mobile.Views.EmployeeDashboardPage"
+             Title="OfficeBite"
+             BackgroundColor="#EEF2F6">
+
+    <NavigationPage.TitleView>
+        <Grid ColumnDefinitions="*,Auto" Padding="0,0,12,0" VerticalOptions="Center">
+            <Label Grid.Column="0" Text="🍱 OfficeBite" FontSize="19" FontAttributes="Bold" TextColor="White" VerticalOptions="Center" />
+            <Button Grid.Column="1"
+                    Text="Logout"
+                    FontSize="13"
+                    FontAttributes="Bold"
+                    BackgroundColor="#3730A3"
+                    TextColor="White"
+                    CornerRadius="8"
+                    HeightRequest="34"
+                    Padding="12,0"
+                    Clicked="LogoutButton_Clicked" />
+        </Grid>
+    </NavigationPage.TitleView>
+
+    <Grid RowDefinitions="*,Auto">
+        <RefreshView Grid.Row="0" x:Name="RefreshView" Refreshing="OnRefreshing" RefreshColor="#4F46E5">
+            <ScrollView>
+                <VerticalStackLayout Padding="16,16,16,24" Spacing="16">
+                    <!-- Welcome Banner -->
+                    <Border BackgroundColor="#4F46E5" StrokeThickness="0" Padding="20,18">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="18" />
+                        </Border.StrokeShape>
+                        <Border.Shadow>
+                            <Shadow Brush="#304F46E5" Offset="0,4" Radius="10" Opacity="0.3" />
+                        </Border.Shadow>
+                        <VerticalStackLayout Spacing="4">
+                            <Label x:Name="GreetingLabel" Text="Good Morning!" FontSize="20" FontAttributes="Bold" TextColor="White" />
+                            <Label x:Name="UserNameLabel" Text="Loading..." FontSize="15" TextColor="#C7D2FE" />
+                            <Label x:Name="DateLabel" FontSize="12" TextColor="#A5B4FC" Margin="0,4,0,0" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Section: Today's Menu -->
+                    <Label Text="🍽️ Today's Lunch Menu" FontSize="17" FontAttributes="Bold" TextColor="#0F172A" Margin="2,0,0,-4" />
+
+                    <!-- No Menu Placeholder -->
+                    <Border x:Name="NoMenuBorder" BackgroundColor="White" StrokeThickness="0" Padding="24,28" IsVisible="True">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="16" />
+                        </Border.StrokeShape>
+                        <VerticalStackLayout Spacing="8" HorizontalOptions="Center">
+                            <Label Text="⏳" FontSize="36" HorizontalOptions="Center" />
+                            <Label Text="Menu Not Uploaded Yet" FontSize="16" FontAttributes="Bold" TextColor="#1E293B" HorizontalOptions="Center" />
+                            <Label Text="Today's menu will be uploaded shortly. Pull down to refresh." FontSize="13" TextColor="#64748B" HorizontalOptions="Center" HorizontalTextAlignment="Center" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Already Ordered Info Card (Shown when order placed) -->
+                    <Border x:Name="AlreadyOrderedCard" BackgroundColor="White" StrokeThickness="0" Padding="18" IsVisible="False">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="16" />
+                        </Border.StrokeShape>
+                        <Border.Shadow>
+                            <Shadow Brush="#10000000" Offset="0,2" Radius="8" Opacity="0.1" />
+                        </Border.Shadow>
+                        <VerticalStackLayout Spacing="12">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Label Grid.Column="0" Text="✅ Today's Order Placed" FontSize="16" FontAttributes="Bold" TextColor="#15803D" VerticalOptions="Center" />
+                                <Border Grid.Column="1" x:Name="MyOrderStatusBadge" BackgroundColor="#3B82F6" StrokeThickness="0" Padding="10,4">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="12" />
+                                    </Border.StrokeShape>
+                                    <Label x:Name="MyOrderStatusLabel" Text="Confirmed" FontSize="11" FontAttributes="Bold" TextColor="White" />
+                                </Border>
+                            </Grid>
+                            <Label x:Name="MyOrderDetailsLabel" FontSize="14" TextColor="#334155" />
+                            <Grid ColumnDefinitions="*,Auto" Margin="0,4,0,0">
+                                <Label Grid.Column="0" Text="Total Amount:" FontSize="13" TextColor="#64748B" VerticalOptions="Center" />
+                                <Label Grid.Column="1" x:Name="MyOrderTotalLabel" FontSize="16" FontAttributes="Bold" TextColor="#7C3AED" VerticalOptions="Center" />
+                            </Grid>
+                            <Label Text="Your lunch is being prepared by the kitchen." FontSize="12" TextColor="#166534" HorizontalOptions="Center" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Menu Available & Ordering Card -->
+                    <Border x:Name="MenuCard" BackgroundColor="White" StrokeThickness="0" Padding="0" IsVisible="False">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="16" />
+                        </Border.StrokeShape>
+                        <Border.Shadow>
+                            <Shadow Brush="#10000000" Offset="0,2" Radius="8" Opacity="0.1" />
+                        </Border.Shadow>
+                        <VerticalStackLayout>
+                            <!-- Menu Header -->
+                            <Grid ColumnDefinitions="*,Auto" Padding="16,14" BackgroundColor="#EEF2FF">
+                                <Label Grid.Column="0" x:Name="MenuTitleLabel" FontSize="16" FontAttributes="Bold" TextColor="#3730A3" VerticalOptions="Center" />
+                                <Border Grid.Column="1" x:Name="OrderingBadge" BackgroundColor="#10B981" StrokeThickness="0" Padding="10,4">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="12" />
+                                    </Border.StrokeShape>
+                                    <Label x:Name="OrderingBadgeLabel" Text="Open" FontSize="11" FontAttributes="Bold" TextColor="White" />
+                                </Border>
+                            </Grid>
+
+                            <!-- Food Items with Add to Cart / Quantity Controls -->
+                            <VerticalStackLayout x:Name="FoodItemsListStack" Padding="12,10" Spacing="10" />
+
+                            <!-- Special Instructions & Order Section inside Menu Card -->
+                            <VerticalStackLayout x:Name="OrderExecutionSection" Padding="14,0,14,16" Spacing="12" IsVisible="False">
+                                <BoxView HeightRequest="1" BackgroundColor="#E2E8F0" Margin="0,4" />
+
+                                <!-- Special Instructions Field -->
+                                <VerticalStackLayout Spacing="6">
+                                    <Label Text="📝 Special Instructions for Kitchen"
+                                           FontSize="13"
+                                           FontAttributes="Bold"
+                                           TextColor="#334155" />
+                                    <Border BackgroundColor="#F8FAFC" Stroke="#CBD5E1" StrokeThickness="1" Padding="12,4">
+                                        <Border.StrokeShape>
+                                            <RoundRectangle CornerRadius="10" />
+                                        </Border.StrokeShape>
+                                        <Entry x:Name="SpecialInstructionsEntry"
+                                               Placeholder="e.g. Less spicy, no onion, extra gravy..."
+                                               FontSize="13"
+                                               TextColor="#0F172A"
+                                               PlaceholderColor="#94A3B8"
+                                               ClearButtonVisibility="WhileEditing"
+                                               HeightRequest="44" />
+                                    </Border>
+                                </VerticalStackLayout>
+
+                                <!-- Total Calculation & Place Order Button -->
+                                <Border BackgroundColor="#F5F3FF" Stroke="#DDD6FE" StrokeThickness="1" Padding="14,12">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="12" />
+                                    </Border.StrokeShape>
+                                    <Grid ColumnDefinitions="*,Auto" VerticalOptions="Center">
+                                        <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                            <Label x:Name="InlineItemCountLabel" Text="0 items selected" FontSize="12" TextColor="#6B7280" />
+                                            <Label x:Name="InlineTotalLabel" Text="Total: Rs. 0" FontSize="17" FontAttributes="Bold" TextColor="#7C3AED" />
+                                        </VerticalStackLayout>
+                                        <Button Grid.Column="1"
+                                                x:Name="InlinePlaceOrderBtn"
+                                                Text="🚀 Place Order"
+                                                FontSize="14"
+                                                FontAttributes="Bold"
+                                                HeightRequest="44"
+                                                CornerRadius="10"
+                                                BackgroundColor="#4F46E5"
+                                                TextColor="White"
+                                                Padding="16,0"
+                                                Clicked="PlaceOrderButton_Clicked" />
+                                    </Grid>
+                                </Border>
+                            </VerticalStackLayout>
+
+                        </VerticalStackLayout>
+                    </Border>
+
+                </VerticalStackLayout>
+            </ScrollView>
+        </RefreshView>
+
+        <!-- Sticky Bottom Cart Bar -->
+        <Border Grid.Row="1" x:Name="CartBar" BackgroundColor="White" StrokeThickness="0" Padding="16,12" IsVisible="False">
+            <Border.Shadow>
+                <Shadow Brush="#20000000" Offset="0,-4" Radius="12" Opacity="0.15" />
+            </Border.Shadow>
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" VerticalOptions="Center">
+                <VerticalStackLayout Grid.Column="0" Spacing="2" VerticalOptions="Center">
+                    <Label x:Name="CartSummaryLabel" Text="0 items selected" FontSize="12" TextColor="#64748B" />
+                    <Label x:Name="CartTotalLabel" Text="Rs. 0" FontSize="18" FontAttributes="Bold" TextColor="#7C3AED" />
+                </VerticalStackLayout>
+                <Button Grid.Column="1"
+                        x:Name="PlaceOrderButton"
+                        Text="🚀 Place Order"
+                        FontSize="14"
+                        FontAttributes="Bold"
+                        HeightRequest="46"
+                        CornerRadius="12"
+                        BackgroundColor="#4F46E5"
+                        TextColor="White"
+                        Padding="18,0"
+                        Clicked="PlaceOrderButton_Clicked" />
+            </Grid>
+        </Border>
+    </Grid>
+</ContentPage>

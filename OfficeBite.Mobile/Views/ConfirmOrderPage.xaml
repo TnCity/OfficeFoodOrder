@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="OfficeBite.Mobile.Views.ConfirmOrderPage"
+             Title="Confirm Order"
+             BackgroundColor="#EEF2F6">
+
+    <NavigationPage.TitleView>
+        <Grid ColumnDefinitions="Auto,*" Padding="0,0,16,0" VerticalOptions="Center">
+            <Button Grid.Column="0"
+                    Text="← Back"
+                    FontSize="14"
+                    FontAttributes="Bold"
+                    BackgroundColor="#3730A3"
+                    TextColor="White"
+                    CornerRadius="8"
+                    HeightRequest="34"
+                    Padding="10,0"
+                    Clicked="BackButton_Clicked" />
+            <Label Grid.Column="1"
+                   Text="Review &amp; Confirm"
+                   FontSize="17"
+                   FontAttributes="Bold"
+                   TextColor="White"
+                   VerticalOptions="Center"
+                   Margin="12,0,0,0" />
+        </Grid>
+    </NavigationPage.TitleView>
+
+    <Grid RowDefinitions="*,Auto">
+        <ScrollView Grid.Row="0">
+            <VerticalStackLayout Padding="16" Spacing="14">
+                <!-- Summary Header -->
+                <Border BackgroundColor="#4F46E5" StrokeThickness="0" Padding="18,16">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="16" />
+                    </Border.StrokeShape>
+                    <VerticalStackLayout Spacing="2">
+                        <Label Text="Your Lunch Order Summary" FontSize="18" FontAttributes="Bold" TextColor="White" />
+                        <Label Text="Please review the items before confirming" FontSize="12" TextColor="#C7D2FE" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Order Items Card -->
+                <Border BackgroundColor="White" StrokeThickness="0" Padding="16">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="16" />
+                    </Border.StrokeShape>
+                    <VerticalStackLayout Spacing="0">
+                        <CollectionView x:Name="OrderItemsCollection" SelectionMode="None">
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid ColumnDefinitions="*,Auto,Auto" Padding="0,10">
+                                        <Label Grid.Column="0" Text="{Binding FoodName}" FontSize="15" FontAttributes="Bold" TextColor="#0F172A" VerticalOptions="Center" />
+                                        <Label Grid.Column="1" Text="{Binding Quantity, StringFormat='x {0}'}" FontSize="14" TextColor="#64748B" VerticalOptions="Center" Margin="8,0" />
+                                        <Label Grid.Column="2" Text="{Binding ItemTotal, StringFormat='Rs.{0:0}'}" FontSize="15" FontAttributes="Bold" TextColor="#4F46E5" VerticalOptions="Center" />
+                                    </Grid>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+
+                        <BoxView HeightRequest="1" Color="#E2E8F0" Margin="0,10" />
+
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Grid.Column="0" Text="Total Amount To Pay" FontSize="16" FontAttributes="Bold" TextColor="#0F172A" VerticalOptions="Center" />
+                            <Label Grid.Column="1" x:Name="TotalLabel" FontSize="20" FontAttributes="Bold" TextColor="#16A34A" />
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Helpful Note -->
+                <Border BackgroundColor="#EFF6FF" StrokeThickness="0" Padding="14,12">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="12" />
+                    </Border.StrokeShape>
+                    <Label Text="💡 Sandeep daa will be notified immediately once you place this order." FontSize="13" TextColor="#1E40AF" HorizontalTextAlignment="Center" />
+                </Border>
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- Place Order Button Sticky Footer -->
+        <Border Grid.Row="1" BackgroundColor="White" StrokeThickness="0" Padding="16,14">
+            <Border.Shadow>
+                <Shadow Brush="#15000000" Offset="0,-3" Radius="10" Opacity="0.1" />
+            </Border.Shadow>
+            <VerticalStackLayout Spacing="8">
+                <ActivityIndicator x:Name="LoadingIndicator" IsVisible="False" IsRunning="False" Color="#16A34A" HorizontalOptions="Center" />
+                <Button x:Name="PlaceOrderButton"
+                        Text="✅ Confirm &amp; Place Order"
+                        FontSize="16"
+                        FontAttributes="Bold"
+                        HeightRequest="52"
+                        CornerRadius="14"
+                        BackgroundColor="#16A34A"
+                        TextColor="White"
+                        Clicked="PlaceOrderButton_Clicked" />
+            </VerticalStackLayout>
+        </Border>
+    </Grid>
+</ContentPage>

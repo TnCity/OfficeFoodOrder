@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Application xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="OfficeBite.Mobile.App">
+    <Application.Resources>
+        <ResourceDictionary>
+            <Color x:Key="Primary">#4F46E5</Color>
+            <Color x:Key="PrimaryAdmin">#7C3AED</Color>
+            <Color x:Key="Background">#F0F4FF</Color>
+            <Color x:Key="CardBg">#FFFFFF</Color>
+            <Color x:Key="TextDark">#111827</Color>
+            <Color x:Key="TextMuted">#6B7280</Color>
+            <Color x:Key="Success">#10B981</Color>
+            <Color x:Key="Error">#EF4444</Color>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

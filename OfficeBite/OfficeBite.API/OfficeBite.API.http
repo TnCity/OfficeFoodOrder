@@ -1,0 +1,6 @@
+@OfficeBite.API_HostAddress = http://localhost:5052
+
+GET {{OfficeBite.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="OfficeBite.Mobile.Views.TodayMenuPage"
+             Title="Today's Menu"
+             BackgroundColor="#EEF2F6">
+
+    <NavigationPage.TitleView>
+        <Grid ColumnDefinitions="Auto,*" Padding="0,0,16,0" VerticalOptions="Center">
+            <Button Grid.Column="0"
+                    Text="← Back"
+                    FontSize="14"
+                    FontAttributes="Bold"
+                    BackgroundColor="#3730A3"
+                    TextColor="White"
+                    CornerRadius="8"
+                    HeightRequest="34"
+                    Padding="10,0"
+                    Clicked="BackButton_Clicked" />
+            <Label Grid.Column="1"
+                   Text="Select Food"
+                   FontSize="17"
+                   FontAttributes="Bold"
+                   TextColor="White"
+                   VerticalOptions="Center"
+                   Margin="12,0,0,0" />
+        </Grid>
+    </NavigationPage.TitleView>
+
+    <Grid RowDefinitions="*,Auto">
+        <ScrollView Grid.Row="0">
+            <VerticalStackLayout Padding="16" Spacing="12">
+                <!-- Header Banner -->
+                <Border BackgroundColor="#4F46E5" StrokeThickness="0" Padding="18,16">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="16" />
+                    </Border.StrokeShape>
+                    <VerticalStackLayout Spacing="4">
+                        <Label x:Name="MenuTitleLabel" FontSize="18" FontAttributes="Bold" TextColor="White" />
+                        <Label Text="Tap '+' and '-' to choose quantities for your lunch" FontSize="12" TextColor="#C7D2FE" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Food Items List -->
+                <CollectionView x:Name="FoodItemsCollection" SelectionMode="None">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Border BackgroundColor="White" StrokeThickness="0" Padding="16" Margin="0,0,0,10">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="16" />
+                                </Border.StrokeShape>
+                                <Border.Shadow>
+                                    <Shadow Brush="#08000000" Offset="0,2" Radius="6" Opacity="0.08" />
+                                </Border.Shadow>
+                                <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto" RowSpacing="6">
+                                    <Label Grid.Row="0" Grid.Column="0" Text="{Binding FoodName}" FontSize="16" FontAttributes="Bold" TextColor="#0F172A" />
+                                    <Label Grid.Row="0" Grid.Column="1" Text="{Binding PriceDisplay}" FontSize="16" FontAttributes="Bold" TextColor="#4F46E5" VerticalOptions="Center" />
+
+                                    <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Text="{Binding Description}" FontSize="13" TextColor="#64748B" />
+
+                                    <!-- Quantity Selector Controls -->
+                                    <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" ColumnDefinitions="Auto,Auto,Auto" Margin="0,6,0,0">
+                                        <Button Grid.Column="0"
+                                                Text="−"
+                                                FontSize="20"
+                                                FontAttributes="Bold"
+                                                WidthRequest="44"
+                                                HeightRequest="44"
+                                                CornerRadius="12"
+                                                BackgroundColor="#F1F5F9"
+                                                TextColor="#4F46E5"
+                                                CommandParameter="{Binding .}"
+                                                Clicked="MinusButton_Clicked" />
+
+                                        <Label Grid.Column="1"
+                                               Text="{Binding Quantity}"
+                                               FontSize="18"
+                                               FontAttributes="Bold"
+                                               TextColor="#0F172A"
+                                               WidthRequest="48"
+                                               HorizontalOptions="Center"
+                                               HorizontalTextAlignment="Center"
+                                               VerticalOptions="Center" />
+
+                                        <Button Grid.Column="2"
+                                                Text="+"
+                                                FontSize="20"
+                                                FontAttributes="Bold"
+                                                WidthRequest="44"
+                                                HeightRequest="44"
+                                                CornerRadius="12"
+                                                BackgroundColor="#4F46E5"
+                                                TextColor="White"
+                                                CommandParameter="{Binding .}"
+                                                Clicked="PlusButton_Clicked" />
+                                    </Grid>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- Sticky Bottom Cart Summary -->
+        <Border Grid.Row="1" BackgroundColor="White" StrokeThickness="0" Padding="16,14">
+            <Border.Shadow>
+                <Shadow Brush="#15000000" Offset="0,-3" Radius="10" Opacity="0.1" />
+            </Border.Shadow>
+            <Grid ColumnDefinitions="*,Auto">
+                <VerticalStackLayout Grid.Column="0" Spacing="2" VerticalOptions="Center">
+                    <Label Text="Total Amount" FontSize="12" TextColor="#64748B" />
+                    <Label x:Name="CartTotalLabel" Text="Rs.0 (0 items)" FontSize="17" FontAttributes="Bold" TextColor="#0F172A" />
+                </VerticalStackLayout>
+
+                <Button Grid.Column="1"
+                        x:Name="ConfirmOrderButton"
+                        Text="Review Order →"
+                        FontSize="14"
+                        FontAttributes="Bold"
+                        HeightRequest="48"
+                        CornerRadius="12"
+                        BackgroundColor="#4F46E5"
+                        TextColor="White"
+                        IsEnabled="False"
+                        Clicked="ConfirmOrderButton_Clicked" />
+            </Grid>
+        </Border>
+    </Grid>
+</ContentPage>

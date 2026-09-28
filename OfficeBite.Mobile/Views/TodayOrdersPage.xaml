@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="OfficeBite.Mobile.Views.TodayOrdersPage"
+             Title="Today's Orders"
+             BackgroundColor="#EEF2F6">
+
+    <NavigationPage.TitleView>
+        <Grid ColumnDefinitions="Auto,*" Padding="0,0,16,0" VerticalOptions="Center">
+            <Button Grid.Column="0"
+                    Text="← Back"
+                    FontSize="14"
+                    FontAttributes="Bold"
+                    BackgroundColor="#5B21B6"
+                    TextColor="White"
+                    CornerRadius="8"
+                    HeightRequest="34"
+                    Padding="10,0"
+                    Clicked="BackButton_Clicked" />
+            <Label Grid.Column="1"
+                   Text="Live Orders List"
+                   FontSize="17"
+                   FontAttributes="Bold"
+                   TextColor="White"
+                   VerticalOptions="Center"
+                   Margin="12,0,0,0" />
+        </Grid>
+    </NavigationPage.TitleView>
+
+    <RefreshView x:Name="RefreshView" Refreshing="OnRefreshing" RefreshColor="#7C3AED">
+        <ScrollView>
+            <VerticalStackLayout Padding="16" Spacing="12">
+                <ActivityIndicator x:Name="LoadingIndicator" IsRunning="True" IsVisible="True" Color="#7C3AED" HorizontalOptions="Center" Margin="0,40" />
+
+                <!-- Empty State -->
+                <Border x:Name="NoOrdersBorder" BackgroundColor="White" StrokeThickness="0" Padding="32" IsVisible="False">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="16" />
+                    </Border.StrokeShape>
+                    <VerticalStackLayout Spacing="8" HorizontalOptions="Center">
+                        <Label Text="📦" FontSize="36" HorizontalOptions="Center" />
+                        <Label Text="No Orders Placed Yet Today" FontSize="16" FontAttributes="Bold" TextColor="#1E293B" HorizontalOptions="Center" />
+                        <Label Text="Orders from employees will show up here live in real-time." FontSize="13" TextColor="#64748B" HorizontalOptions="Center" HorizontalTextAlignment="Center" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Dynamic Orders Stack -->
+                <VerticalStackLayout x:Name="OrdersStack" Spacing="12" IsVisible="False" />
+            </VerticalStackLayout>
+        </ScrollView>
+    </RefreshView>
+</ContentPage>

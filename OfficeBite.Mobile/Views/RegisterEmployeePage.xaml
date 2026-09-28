@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="OfficeBite.Mobile.Views.RegisterEmployeePage"
+             Title="Employee Registration"
+             BackgroundColor="#EEF2F6">
+
+    <NavigationPage.TitleView>
+        <Grid ColumnDefinitions="Auto,*" Padding="0,0,16,0" VerticalOptions="Center">
+            <Button Grid.Column="0"
+                    Text="← Back"
+                    FontSize="14"
+                    FontAttributes="Bold"
+                    BackgroundColor="#4338CA"
+                    TextColor="White"
+                    CornerRadius="8"
+                    HeightRequest="34"
+                    Padding="10,0"
+                    Clicked="BackButton_Clicked" />
+            <Label Grid.Column="1"
+                   Text="Employee Registration"
+                   FontSize="17"
+                   FontAttributes="Bold"
+                   TextColor="White"
+                   VerticalOptions="Center"
+                   Margin="12,0,0,0" />
+        </Grid>
+    </NavigationPage.TitleView>
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20,24,20,32" Spacing="16">
+
+            <!-- Header Card -->
+            <Border BackgroundColor="#4F46E5" StrokeThickness="0" Padding="20,18">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="18" />
+                </Border.StrokeShape>
+                <Border.Shadow>
+                    <Shadow Brush="#304F46E5" Offset="0,4" Radius="10" Opacity="0.3" />
+                </Border.Shadow>
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14" VerticalOptions="Center">
+                    <Border Grid.Column="0" BackgroundColor="#6366F1" StrokeThickness="0" WidthRequest="48" HeightRequest="48">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="14" />
+                        </Border.StrokeShape>
+                        <Label Text="👤" FontSize="24" HorizontalOptions="Center" VerticalOptions="Center" />
+                    </Border>
+                    <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                        <Label Text="New Employee Account" FontSize="18" FontAttributes="Bold" TextColor="White" />
+                        <Label Text="Create an account to order meals" FontSize="12" TextColor="#E0E7FF" />
+                    </VerticalStackLayout>
+                </Grid>
+            </Border>
+
+            <!-- Registration Form Card -->
+            <Border BackgroundColor="White" StrokeThickness="0" Padding="20,24">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="20" />
+                </Border.StrokeShape>
+                <Border.Shadow>
+                    <Shadow Brush="#10000000" Offset="0,4" Radius="12" Opacity="0.08" />
+                </Border.Shadow>
+                <VerticalStackLayout Spacing="14">
+
+                    <!-- Full Name -->
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Full Name" FontSize="13" FontAttributes="Bold" TextColor="#334155" />
+                        <Border BackgroundColor="#F8FAFC" Stroke="#E2E8F0" StrokeThickness="1" Padding="12,0">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="10" />
+                            </Border.StrokeShape>
+                            <Entry x:Name="FullNameEntry"
+                                   Placeholder="e.g. Rahul Sharma"
+                                   TextColor="#0F172A"
+                                   PlaceholderColor="#94A3B8"
+                                   ClearButtonVisibility="WhileEditing"
+                                   HeightRequest="46" />
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- Mobile Number -->
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Mobile Number" FontSize="13" FontAttributes="Bold" TextColor="#334155" />
+                        <Border BackgroundColor="#F8FAFC" Stroke="#E2E8F0" StrokeThickness="1" Padding="12,0">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="10" />
+                            </Border.StrokeShape>
+                            <Entry x:Name="MobileEntry"
+                                   Placeholder="e.g. 9876543210"
+                                   Keyboard="Telephone"
+                                   TextColor="#0F172A"
+                                   PlaceholderColor="#94A3B8"
+                                   ClearButtonVisibility="WhileEditing"
+                                   HeightRequest="46" />
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- Email -->
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Email Address" FontSize="13" FontAttributes="Bold" TextColor="#334155" />
+                        <Border BackgroundColor="#F8FAFC" Stroke="#E2E8F0" StrokeThickness="1" Padding="12,0">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="10" />
+                            </Border.StrokeShape>
+                            <Entry x:Name="EmailEntry"
+                                   Placeholder="e.g. rahul@office.com"
+                                   Keyboard="Email"
+                                   TextColor="#0F172A"
+                                   PlaceholderColor="#94A3B8"
+                                   ClearButtonVisibility="WhileEditing"
+                                   HeightRequest="46" />
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- Password -->
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Password" FontSize="13" FontAttributes="Bold" TextColor="#334155" />
+                        <Border BackgroundColor="#F8FAFC" Stroke="#E2E8F0" StrokeThickness="1" Padding="12,0">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="10" />
+                            </Border.StrokeShape>
+                            <Entry x:Name="PasswordEntry"
+                                   Placeholder="Minimum 6 characters"
+                                   IsPassword="True"
+                                   TextColor="#0F172A"
+                                   PlaceholderColor="#94A3B8"
+                                   ClearButtonVisibility="WhileEditing"
+                                   HeightRequest="46" />
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- Confirm Password -->
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Confirm Password" FontSize="13" FontAttributes="Bold" TextColor="#334155" />
+                        <Border BackgroundColor="#F8FAFC" Stroke="#E2E8F0" StrokeThickness="1" Padding="12,0">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="10" />
+                            </Border.StrokeShape>
+                            <Entry x:Name="ConfirmPasswordEntry"
+                                   Placeholder="Re-enter password"
+                                   IsPassword="True"
+                                   TextColor="#0F172A"
+                                   PlaceholderColor="#94A3B8"
+                                   ClearButtonVisibility="WhileEditing"
+                                   HeightRequest="46" />
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- Error Alert Box -->
+                    <Border x:Name="ErrorBorder" BackgroundColor="#FEF2F2" Stroke="#FCA5A5" StrokeThickness="1" Padding="12,10" IsVisible="False">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="10" />
+                        </Border.StrokeShape>
+                        <Label x:Name="ErrorLabel" TextColor="#DC2626" FontSize="13" />
+                    </Border>
+
+                    <!-- Register Button -->
+                    <Button x:Name="RegisterButton"
+                            Text="Create Account"
+                            FontSize="15"
+                            FontAttributes="Bold"
+                            HeightRequest="50"
+                            CornerRadius="12"
+                            BackgroundColor="#4F46E5"
+                            TextColor="White"
+                            Margin="0,8,0,0"
+                            Clicked="RegisterButton_Clicked" />
+
+                    <!-- Loading Indicator -->
+                    <ActivityIndicator x:Name="LoadingIndicator"
+                                       IsVisible="False"
+                                       IsRunning="False"
+                                       Color="#4F46E5"
+                                       HorizontalOptions="Center" />
+
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Back to Login Link -->
+            <Border BackgroundColor="White" StrokeThickness="0" Padding="16,14">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="14" />
+                </Border.StrokeShape>
+                <Grid ColumnDefinitions="*,Auto" VerticalOptions="Center">
+                    <Label Grid.Column="0" Text="Already have an account?" FontSize="13" TextColor="#64748B" VerticalOptions="Center" />
+                    <Button Grid.Column="1"
+                            Text="Sign In"
+                            FontSize="13"
+                            FontAttributes="Bold"
+                            TextColor="#4F46E5"
+                            BackgroundColor="Transparent"
+                            Padding="8,0"
+                            HeightRequest="36"
+                            Clicked="SignInLink_Clicked" />
+                </Grid>
+            </Border>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
