@@ -7,7 +7,7 @@
 
     <NavigationPage.TitleView>
         <Grid ColumnDefinitions="*,Auto" Padding="0,0,12,0" VerticalOptions="Center">
-            <Label Grid.Column="0" Text="👑 Sandeep daa (Admin)" FontSize="18" FontAttributes="Bold" TextColor="White" VerticalOptions="Center" />
+            <Label Grid.Column="0" Text="Mr. Sanjeeb" FontSize="18" FontAttributes="Bold" TextColor="White" VerticalOptions="Center" />
             <Button Grid.Column="1"
                     Text="Logout"
                     FontSize="13"
@@ -51,8 +51,19 @@
                             TextColor="White"
                             Clicked="CreateMenuButton_Clicked" />
 
+                    <!-- For Manual Order -->
+                    <Button Grid.Row="1" Grid.ColumnSpan="2"
+                            Text="✍️ Take Manual Order for Employee"
+                            FontSize="14"
+                            FontAttributes="Bold"
+                            HeightRequest="50"
+                            CornerRadius="14"
+                            BackgroundColor="#059669"
+                            TextColor="White"
+                            Clicked="ManualOrderButton_Clicked" />
+
                     <Button Grid.Row="0" Grid.Column="1"
-                            Text="📋 View Live&#10;Orders List"
+                            Text="📋 View Order&#10;Orders List"
                             FontSize="13"
                             FontAttributes="Bold"
                             HeightRequest="64"
@@ -61,7 +72,7 @@
                             TextColor="White"
                             Clicked="ViewOrdersButton_Clicked" />
 
-                    <Button Grid.Row="1" Grid.ColumnSpan="2"
+                    <!--<Button Grid.Row="1" Grid.ColumnSpan="2"
                             Text="👤 Register New Employee"
                             FontSize="13"
                             FontAttributes="Bold"
@@ -69,11 +80,11 @@
                             CornerRadius="12"
                             BackgroundColor="#4F46E5"
                             TextColor="White"
-                            Clicked="RegisterEmployeeButton_Clicked" />
+                            Clicked="RegisterEmployeeButton_Clicked" />-->
                 </Grid>
 
                 <!-- Section: Today's Summary -->
-                <Label Text="📊 Today's Live Statistics" FontSize="17" FontAttributes="Bold" TextColor="#0F172A" Margin="2,6,0,-6" />
+                <Label Text="📊 Today's Order Stats" FontSize="17" FontAttributes="Bold" TextColor="#0F172A" Margin="2,6,0,-6" />
                 <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="10">
                     <!-- Total Orders -->
                     <Border Grid.Row="0" Grid.Column="0" BackgroundColor="White" StrokeThickness="0" Padding="16">
@@ -97,52 +108,52 @@
                         </VerticalStackLayout>
                     </Border>
 
-                    <!-- Pending / Confirmed -->
-                    <Border Grid.Row="1" Grid.Column="0" BackgroundColor="#EFF6FF" StrokeThickness="0" Padding="16">
+                    <!-- Pending (New) -->
+                    <Border Grid.Row="1" Grid.Column="0" BackgroundColor="#FEF3C7" StrokeThickness="0" Padding="16">
                         <Border.StrokeShape>
                             <RoundRectangle CornerRadius="14" />
                         </Border.StrokeShape>
                         <VerticalStackLayout Spacing="2">
-                            <Label Text="New / Pending" FontSize="12" TextColor="#1D4ED8" />
-                            <Label x:Name="PendingLabel" Text="0" FontSize="26" FontAttributes="Bold" TextColor="#1D4ED8" />
+                            <Label Text="⏳ Pending" FontSize="12" TextColor="#B45309" />
+                            <Label x:Name="PendingLabel" Text="0" FontSize="26" FontAttributes="Bold" TextColor="#B45309" />
                         </VerticalStackLayout>
                     </Border>
 
-                    <!-- Preparing -->
-                    <Border Grid.Row="1" Grid.Column="1" BackgroundColor="#FEF3C7" StrokeThickness="0" Padding="16">
+                    <!-- Confirmed -->
+                    <Border Grid.Row="1" Grid.Column="1" BackgroundColor="#EFF6FF" StrokeThickness="0" Padding="16">
                         <Border.StrokeShape>
                             <RoundRectangle CornerRadius="14" />
                         </Border.StrokeShape>
                         <VerticalStackLayout Spacing="2">
-                            <Label Text="🍳 Cooking" FontSize="12" TextColor="#B45309" />
-                            <Label x:Name="PreparingLabel" Text="0" FontSize="26" FontAttributes="Bold" TextColor="#B45309" />
+                            <Label Text="👍 Confirmed" FontSize="12" TextColor="#1D4ED8" />
+                            <Label x:Name="ConfirmedLabel" Text="0" FontSize="26" FontAttributes="Bold" TextColor="#1D4ED8" />
                         </VerticalStackLayout>
                     </Border>
 
-                    <!-- Ready -->
+                    <!-- Delivered -->
                     <Border Grid.Row="2" Grid.Column="0" BackgroundColor="#ECFDF5" StrokeThickness="0" Padding="16">
                         <Border.StrokeShape>
                             <RoundRectangle CornerRadius="14" />
                         </Border.StrokeShape>
                         <VerticalStackLayout Spacing="2">
-                            <Label Text="📦 Ready for Pickup" FontSize="12" TextColor="#047857" />
-                            <Label x:Name="ReadyLabel" Text="0" FontSize="26" FontAttributes="Bold" TextColor="#047857" />
+                            <Label Text="✅ Delivered" FontSize="12" TextColor="#047857" />
+                            <Label x:Name="DeliveredLabel" Text="0" FontSize="26" FontAttributes="Bold" TextColor="#047857" />
                         </VerticalStackLayout>
                     </Border>
 
-                    <!-- Completed -->
-                    <Border Grid.Row="2" Grid.Column="1" BackgroundColor="#F1F5F9" StrokeThickness="0" Padding="16">
+                    <!-- Cancelled -->
+                    <Border Grid.Row="2" Grid.Column="1" BackgroundColor="#FEF2F2" StrokeThickness="0" Padding="16">
                         <Border.StrokeShape>
                             <RoundRectangle CornerRadius="14" />
                         </Border.StrokeShape>
                         <VerticalStackLayout Spacing="2">
-                            <Label Text="✅ Completed" FontSize="12" TextColor="#475569" />
-                            <Label x:Name="CompletedLabel" Text="0" FontSize="26" FontAttributes="Bold" TextColor="#475569" />
+                            <Label Text="❌ Cancelled" FontSize="12" TextColor="#DC2626" />
+                            <Label x:Name="CancelledLabel" Text="0" FontSize="26" FontAttributes="Bold" TextColor="#DC2626" />
                         </VerticalStackLayout>
                     </Border>
                 </Grid>
 
-                <!-- Section: Food Quantities to Prepare -->
+                <!-- Section: Food Quantities to Prepare --><!--
                 <Label Text="🍳 Total Food Items to Cook Today" FontSize="17" FontAttributes="Bold" TextColor="#0F172A" Margin="2,6,0,-6" />
                 <Border BackgroundColor="White" StrokeThickness="0" Padding="16">
                     <Border.StrokeShape>
@@ -151,7 +162,7 @@
                     <VerticalStackLayout x:Name="FoodSummaryStack" Spacing="8">
                         <Label Text="No food orders placed yet" FontSize="13" TextColor="#94A3B8" HorizontalOptions="Center" />
                     </VerticalStackLayout>
-                </Border>
+                </Border>-->
 
                 <!-- Section: Today's Orders from Employees (Live with Name & Total Price) -->
                 <Grid ColumnDefinitions="*,Auto" Margin="2,10,2,-4">

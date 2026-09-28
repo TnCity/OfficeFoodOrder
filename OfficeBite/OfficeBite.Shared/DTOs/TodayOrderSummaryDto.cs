@@ -1,4 +1,4 @@
-﻿namespace OfficeBite.Shared.DTOs;
+namespace OfficeBite.Shared.DTOs;
 
 public class TodayOrderSummaryDto
 {
@@ -10,16 +10,11 @@ public class TodayOrderSummaryDto
 
     public int ConfirmedOrders { get; set; }
 
-    public int PreparingOrders { get; set; }
-
-    public int ReadyOrders { get; set; }
-
-    public int CompletedOrders { get; set; }
+    public int DeliveredOrders { get; set; }
 
     public int CancelledOrders { get; set; }
 
     public decimal TotalAmount { get; set; }
 
-    public List<FoodQuantitySummaryDto> FoodSummary { get; set; }
-        = new();
+    public List<FoodQuantitySummaryDto> FoodSummary { get; set; } = new();
 }

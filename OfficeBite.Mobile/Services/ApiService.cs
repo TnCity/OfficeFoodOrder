@@ -137,6 +137,22 @@ public class ApiService
         return (response.IsSuccessStatusCode, msg);
     }
 
+    public async Task<List<EmployeeLookupDto>> GetEmployeesAsync()
+    {
+        await AuthorizeAsync();
+        var response = await _httpClient.GetAsync("api/Auth/employees");
+        if (!response.IsSuccessStatusCode) return new List<EmployeeLookupDto>();
+        return await response.Content.ReadFromJsonAsync<List<EmployeeLookupDto>>() ?? new List<EmployeeLookupDto>();
+    }
+
+    public async Task<(bool Success, string Message)> PlaceAdminManualOrderAsync(AdminCreateOrderRequest request)
+    {
+        await AuthorizeAsync();
+        var response = await _httpClient.PostAsJsonAsync("api/Order/admin/manual", request);
+        var msg = await SafeReadMessageAsync(response);
+        return (response.IsSuccessStatusCode, msg);
+    }
+
     private static async Task<string> SafeReadMessageAsync(HttpResponseMessage response)
     {
         try

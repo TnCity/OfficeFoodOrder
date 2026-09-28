@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using OfficeBite.BLL.Services;
 using OfficeBite.Shared.DTOs;
 
@@ -81,5 +81,13 @@ public class AuthController : ControllerBase
                 user.Role
             }
         });
+    }
+
+    [Microsoft.AspNetCore.Authorization.Authorize]
+    [HttpGet("employees")]
+    public async Task<IActionResult> GetEmployees()
+    {
+        var employees = await _authService.GetAllEmployeesAsync();
+        return Ok(employees);
     }
 }

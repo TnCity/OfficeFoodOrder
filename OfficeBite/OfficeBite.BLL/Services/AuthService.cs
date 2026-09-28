@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using OfficeBite.DAL.Data;
 using OfficeBite.DAL.Entities;
 using OfficeBite.Shared.DTOs;
@@ -71,5 +71,21 @@ public class AuthService
             return null;
 
         return user;
+    }
+
+    public async Task<List<EmployeeLookupDto>> GetAllEmployeesAsync()
+    {
+        return await _context.Users
+            .Where(u => u.IsActive)
+            .OrderBy(u => u.FullName)
+            .Select(u => new EmployeeLookupDto
+            {
+                UserId = u.UserId,
+                FullName = u.FullName,
+                Email = u.Email,
+                Mobile = u.Mobile,
+                Role = u.Role
+            })
+            .ToListAsync();
     }
 }
