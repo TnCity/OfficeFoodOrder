@@ -17,12 +17,11 @@ namespace OfficeBite.Mobile
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 });
 
-            // 📡 Local Network IP — phone and PC on the same WiFi
-            // PC IP: 192.168.0.134  |  API Port: 5052
+            // 🌐 Live Render Cloud API URL (Accessible from anywhere in the world)
             builder.Services.AddSingleton(new HttpClient
             {
-                BaseAddress = new Uri("http://192.168.0.134:5052/"),
-                Timeout     = TimeSpan.FromSeconds(30)
+                BaseAddress = new Uri("https://officefoodorder.onrender.com/"),
+                Timeout     = TimeSpan.FromSeconds(60)
             });
 
             builder.Services.AddSingleton<ApiService>();
