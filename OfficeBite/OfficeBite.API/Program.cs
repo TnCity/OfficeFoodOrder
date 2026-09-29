@@ -94,18 +94,15 @@ builder.Services.AddAuthentication(
 
 var app = builder.Build();
 
-// Swagger
-if (app.Environment.IsDevelopment())
+// Swagger (enabled for both Development and Render Cloud)
+app.UseSwagger();
+app.UseSwaggerUI(options =>
 {
-    app.UseSwagger();
-
-    app.UseSwaggerUI(options =>
-    {
-        options.SwaggerEndpoint(
-            "/swagger/v1/swagger.json",
-            "OfficeBite API v1");
-    });
-}
+    options.SwaggerEndpoint(
+        "/swagger/v1/swagger.json",
+        "OfficeBite API v1");
+    options.RoutePrefix = string.Empty; // Serves Swagger directly at root URL
+});
 
 app.UseHttpsRedirection();
 
