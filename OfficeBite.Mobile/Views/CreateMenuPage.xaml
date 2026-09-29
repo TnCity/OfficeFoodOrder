@@ -6,24 +6,13 @@
              BackgroundColor="#EEF2F6">
 
     <NavigationPage.TitleView>
-        <Grid ColumnDefinitions="Auto,*" Padding="0,0,16,0" VerticalOptions="Center">
-            <Button Grid.Column="0"
-                    Text="← Back"
-                    FontSize="14"
-                    FontAttributes="Bold"
-                    BackgroundColor="#5B21B6"
-                    TextColor="White"
-                    CornerRadius="8"
-                    HeightRequest="34"
-                    Padding="10,0"
-                    Clicked="BackButton_Clicked" />
-            <Label Grid.Column="1"
-                   Text="Manage Today's Menu"
-                   FontSize="17"
-                   FontAttributes="Bold"
-                   TextColor="White"
-                   VerticalOptions="Center"
-                   Margin="12,0,0,0" />
+        <Grid Padding="0,0,16,0" VerticalOptions="Center">
+            <Label
+        Text="Manage Today's Menu"
+        FontSize="17"
+        FontAttributes="Bold"
+        TextColor="White"
+        VerticalOptions="Center" />
         </Grid>
     </NavigationPage.TitleView>
 
@@ -69,7 +58,7 @@
                 <Grid ColumnDefinitions="*,Auto" Margin="2,6,2,0">
                     <Label x:Name="AddItemsHeaderLabel"
                            Grid.Column="0"
-                           Text="🍱 Add Food Items"
+                           Text=" Add Food Items"
                            FontSize="15"
                            FontAttributes="Bold"
                            TextColor="#0F172A"

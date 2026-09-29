@@ -6,24 +6,12 @@
              BackgroundColor="#EEF2F6">
 
     <NavigationPage.TitleView>
-        <Grid ColumnDefinitions="Auto,*" Padding="0,0,16,0" VerticalOptions="Center">
-            <Button Grid.Column="0"
-                    Text="← Back"
-                    FontSize="14"
-                    FontAttributes="Bold"
-                    BackgroundColor="#3730A3"
-                    TextColor="White"
-                    CornerRadius="8"
-                    HeightRequest="34"
-                    Padding="10,0"
-                    Clicked="BackButton_Clicked" />
-            <Label Grid.Column="1"
-                   Text="My Order History"
+        <Grid Padding="0,0,16,0" VerticalOptions="Center">
+            <Label Text="My Order History"
                    FontSize="17"
                    FontAttributes="Bold"
                    TextColor="White"
-                   VerticalOptions="Center"
-                   Margin="12,0,0,0" />
+                   VerticalOptions="Center" />
         </Grid>
     </NavigationPage.TitleView>
 
