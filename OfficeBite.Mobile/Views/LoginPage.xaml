@@ -141,6 +141,7 @@
                                 BackgroundColor="#0284C7"
                                 TextColor="White"
                                 Clicked="QuickEmployee_Clicked" />
+                        
                     </Grid>
                 </VerticalStackLayout>
             </Border>
