@@ -216,6 +216,24 @@ public class OrderService
         return MapOrder(order);
     }
 
+    public async Task<bool> DeleteOrderAsync(int userId, int orderId)
+    {
+        var order = await _context.Orders
+            .Include(x => x.OrderItems)
+            .FirstOrDefaultAsync(x => x.OrderId == orderId && x.UserId == userId);
+
+        if (order == null)
+            throw new ArgumentException("Order not found.");
+
+        if (order.Status != "Pending")
+            throw new InvalidOperationException("Order is Under process or completed and cannot be deleted.");
+
+        _context.OrderItems.RemoveRange(order.OrderItems);
+        _context.Orders.Remove(order);
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
 
     // ==========================================
     // EMPLOYEE - OWN ORDER HISTORY

@@ -160,14 +160,16 @@ public partial class EmployeeDashboardPage : ContentPage
         if (todayOrder.Status == "Pending")
         {
             ModifyOrderBtn.IsVisible  = !_isModifyingOrder;
+            DeleteOrderBtn.IsVisible  = !_isModifyingOrder;
             CancelModifyBtn.IsVisible = _isModifyingOrder;
-            MyOrderStatusNoteLabel.Text = "⏳ Waiting for Admin to accept. You can modify items or notes below.";
+            MyOrderStatusNoteLabel.Text = "⏳ Waiting for Admin to accept. You can modify items or delete your order below.";
             MyOrderStatusNoteLabel.TextColor = Color.FromArgb("#B45309");
         }
         else if (todayOrder.Status == "Confirmed")
         {
-            // Admin Accepted -> Order is Under Process -> LOCKED (Cannot modify)
+            // Admin Accepted -> Order is Under Process -> LOCKED (Cannot modify or delete)
             ModifyOrderBtn.IsVisible  = false;
+            DeleteOrderBtn.IsVisible  = false;
             CancelModifyBtn.IsVisible = false;
             _isModifyingOrder         = false;
 
@@ -179,6 +181,7 @@ public partial class EmployeeDashboardPage : ContentPage
         else if (todayOrder.Status == "Delivered" || todayOrder.Status == "Completed")
         {
             ModifyOrderBtn.IsVisible  = false;
+            DeleteOrderBtn.IsVisible  = false;
             CancelModifyBtn.IsVisible = false;
             _isModifyingOrder         = false;
 
@@ -190,13 +193,58 @@ public partial class EmployeeDashboardPage : ContentPage
         else if (todayOrder.Status == "Cancelled")
         {
             ModifyOrderBtn.IsVisible  = false;
+            DeleteOrderBtn.IsVisible  = false;
             CancelModifyBtn.IsVisible = false;
             _isModifyingOrder         = false;
 
             MyOrderStatusBadge.BackgroundColor = Color.FromArgb("#EF4444");
             MyOrderStatusLabel.Text = "❌ Cancelled";
-            MyOrderStatusNoteLabel.Text = "❌ Order cancelled by Admin. You can place a new order below.";
+            MyOrderStatusNoteLabel.Text = "❌ Order cancelled. You can place a new order below.";
             MyOrderStatusNoteLabel.TextColor = Color.FromArgb("#DC2626");
+        }
+    }
+
+    private async void DeleteOrderBtn_Clicked(object sender, EventArgs e)
+    {
+        if (_activeTodayOrder == null || _activeTodayOrder.Status != "Pending")
+        {
+            await DisplayAlert("Cannot Delete", "Order is already accepted by Admin and cannot be deleted.", "OK");
+            return;
+        }
+
+        bool confirm = await DisplayAlert("🗑️ Delete Today's Order",
+            $"Are you sure you want to delete and cancel your order of {_activeTodayOrder.TotalDisplay}?\n\nYou will be able to place a new order anytime before lunch ordering closes.",
+            "Yes, Delete Order", "Keep Order");
+
+        if (!confirm) return;
+
+        DeleteOrderBtn.IsEnabled = false;
+
+        try
+        {
+            var (success, msg) = await _apiService.DeleteOrderAsync(_activeTodayOrder.OrderId);
+            if (success)
+            {
+                _isModifyingOrder = false;
+                _activeTodayOrder = null;
+                CancelModifyBtn.IsVisible = false;
+                SpecialInstructionsEntry.Text = string.Empty;
+
+                await DisplayAlert("Order Deleted", "Your order has been deleted. You can place a fresh order now.", "OK");
+                await LoadTodayDataAsync();
+            }
+            else
+            {
+                await DisplayAlert("Delete Failed", msg, "OK");
+            }
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", $"Could not delete order: {ex.Message}", "OK");
+        }
+        finally
+        {
+            DeleteOrderBtn.IsEnabled = true;
         }
     }
 

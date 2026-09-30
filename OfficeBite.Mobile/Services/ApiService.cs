@@ -149,6 +149,18 @@ public class ApiService
         return (response.IsSuccessStatusCode, msg);
     }
 
+    public async Task<(bool Success, string Message)> DeleteOrderAsync(int orderId)
+    {
+        await AuthorizeAsync();
+        var response = await _httpClient.DeleteAsync($"api/Order/{orderId}");
+        if (response.StatusCode == System.Net.HttpStatusCode.MethodNotAllowed)
+        {
+            response = await _httpClient.PostAsync($"api/Order/{orderId}/delete", null);
+        }
+        var msg = await SafeReadMessageAsync(response);
+        return (response.IsSuccessStatusCode, msg);
+    }
+
     public async Task<List<OrderDto>> GetMyOrdersAsync()
     {
         await AuthorizeAsync();

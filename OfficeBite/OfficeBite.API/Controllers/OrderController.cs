@@ -104,6 +104,35 @@ public class OrderController : ControllerBase
 
 
     // ==========================================
+    // EMPLOYEE - DELETE/CANCEL PENDING ORDER
+    // ==========================================
+
+    [Authorize]
+    [HttpDelete("{orderId:int}")]
+    [HttpPost("{orderId:int}/delete")]
+    public async Task<IActionResult> DeleteOrder(int orderId)
+    {
+        try
+        {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!int.TryParse(userIdClaim, out var userId))
+                return Unauthorized();
+
+            var result = await _orderService.DeleteOrderAsync(userId, orderId);
+            return Ok(new { message = "Order deleted successfully." });
+        }
+        catch (ArgumentException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(new { message = ex.Message });
+        }
+    }
+
+
+    // ==========================================
     // EMPLOYEE - MY ORDERS
     // ==========================================
 

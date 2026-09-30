@@ -315,6 +315,58 @@ public partial class OrderHistoryPage : ContentPage
         noteBox.Content = noteText;
         stack.Children.Add(noteBox);
 
+        // If Pending, allow deleting/cancelling the order
+        if (order.Status == "Pending")
+        {
+            var deleteBtn = new Button
+            {
+                Text = "🗑️ Cancel & Delete This Order",
+                FontSize = 12,
+                FontAttributes = FontAttributes.Bold,
+                HeightRequest = 36,
+                CornerRadius = 8,
+                BackgroundColor = Color.FromArgb("#FEF2F2"),
+                TextColor = Color.FromArgb("#DC2626"),
+                BorderColor = Color.FromArgb("#FECACA"),
+                BorderWidth = 1,
+                Margin = new Thickness(0, 4, 0, 0)
+            };
+
+            deleteBtn.Clicked += async (s, e) =>
+            {
+                bool confirm = await DisplayAlert("Cancel & Delete Order",
+                    $"Are you sure you want to cancel and delete this order of {order.TotalDisplay}?",
+                    "Yes, Delete", "Keep Order");
+
+                if (!confirm) return;
+
+                deleteBtn.IsEnabled = false;
+                try
+                {
+                    var (success, msg) = await _apiService.DeleteOrderAsync(order.OrderId);
+                    if (success)
+                    {
+                        await DisplayAlert("Order Deleted", "Your order has been cancelled and deleted.", "OK");
+                        await LoadOrdersAsync();
+                    }
+                    else
+                    {
+                        await DisplayAlert("Delete Failed", msg, "OK");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    await DisplayAlert("Error", $"Could not delete order: {ex.Message}", "OK");
+                }
+                finally
+                {
+                    deleteBtn.IsEnabled = true;
+                }
+            };
+
+            stack.Children.Add(deleteBtn);
+        }
+
         border.Content = stack;
         return border;
     }
