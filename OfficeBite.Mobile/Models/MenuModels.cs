@@ -1,4 +1,4 @@
-﻿namespace OfficeBite.Mobile.Models;
+namespace OfficeBite.Mobile.Models;
 
 public class MenuDto
 {
@@ -37,4 +37,12 @@ public class CreateMenuItemRequest
     public string FoodName { get; set; } = string.Empty;
     public string? Description { get; set; }
     public decimal Price { get; set; }
+}
+
+public class UpdateMenuItemRequest
+{
+    public string FoodName { get; set; } = string.Empty;
+    public string? Description { get; set; }
+    public decimal Price { get; set; }
+    public bool IsAvailable { get; set; }
 }

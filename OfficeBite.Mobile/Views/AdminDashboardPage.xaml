@@ -42,7 +42,7 @@
                 <Label Text="⚡ Actions" FontSize="17" FontAttributes="Bold" TextColor="#0F172A" Margin="2,0,0,-6" />
                 <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="10">
                     <Button Grid.Row="0" Grid.Column="0"
-                            Text="📝 Create / Edit&#10;Today's Menu"
+                            Text="🍽️ Daily Menu&#10;(Active / InActive)"
                             FontSize="13"
                             FontAttributes="Bold"
                             HeightRequest="64"

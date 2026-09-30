@@ -97,6 +97,89 @@ public class MenuService
         return MapMenu(menu);
     }
 
+    public static readonly (string FoodName, decimal Price)[] StandardDailyMenuItems = new[]
+    {
+        ("Fish Thali", 80m),
+        ("Paneer Butter", 50m),
+        ("Subin2paz", 40m),
+        ("Vagturka", 35m),
+        ("Chicken Ragla 2 Pes", 80m),
+        ("Egg Cari", 20m),
+        ("Plow", 60m),
+        ("Aluporata + Chughni", 30m),
+        ("Roti", 5m),
+        ("Egg", 10m),
+        ("Egg Turka", 45m),
+        ("Tok Dahi", 10m),
+        ("Bananna", 5m),
+        ("Vagmills", 50m),
+        ("Egg Thali", 60m),
+        ("Khichuri", 40m),
+        ("Chawmin Egg", 50m),
+        ("Moglai", 170m),
+        ("Piara", 15m)
+    };
+
+    public async Task<Menu> AutoSeedTodayMenuAsync()
+    {
+        var today = DateOnly.FromDateTime(
+            DateTime.UtcNow.AddHours(5.5));
+
+        var existing = await _context.Menus
+            .Include(x => x.MenuItems)
+            .FirstOrDefaultAsync(x => x.MenuDate == today);
+
+        if (existing != null)
+        {
+            // If existing menu has 0 items, seed the standard items
+            if (!existing.MenuItems.Any())
+            {
+                foreach (var (foodName, price) in StandardDailyMenuItems)
+                {
+                    existing.MenuItems.Add(new MenuItem
+                    {
+                        FoodName = foodName,
+                        Price = price,
+                        IsAvailable = true
+                    });
+                }
+                existing.IsPublished = true;
+                existing.IsOrderingOpen = true;
+                await _context.SaveChangesAsync();
+            }
+            return existing;
+        }
+
+        // Create standard daily menu
+        var adminUser = await _context.Users.FirstOrDefaultAsync(u => u.Role == "Admin");
+        var adminId = adminUser?.UserId ?? 1;
+
+        var newMenu = new Menu
+        {
+            MenuDate = today,
+            Title = $"Standard Lunch Menu - {today:dd MMM yyyy}",
+            IsPublished = true,
+            IsOrderingOpen = true,
+            CreatedBy = adminId,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        foreach (var (foodName, price) in StandardDailyMenuItems)
+        {
+            newMenu.MenuItems.Add(new MenuItem
+            {
+                FoodName = foodName,
+                Price = price,
+                IsAvailable = true
+            });
+        }
+
+        _context.Menus.Add(newMenu);
+        await _context.SaveChangesAsync();
+
+        return newMenu;
+    }
+
     public async Task<MenuResponseDto?> GetTodayMenuAsync()
     {
         var today = DateOnly.FromDateTime(
@@ -109,9 +192,36 @@ public class MenuService
                 x.IsPublished);
 
         if (menu == null)
+        {
+            // Auto-seed today's standard menu so employees always have daily lunch menu available
+            menu = await AutoSeedTodayMenuAsync();
+        }
+
+        if (menu == null)
             return null;
 
-        return MapMenu(menu);
+        var dto = new MenuResponseDto
+        {
+            MenuId = menu.MenuId,
+            MenuDate = menu.MenuDate,
+            Title = menu.Title,
+            IsPublished = menu.IsPublished,
+            IsOrderingOpen = menu.IsOrderingOpen,
+            OrderStartTime = menu.OrderStartTime,
+            OrderEndTime = menu.OrderEndTime,
+            Items = menu.MenuItems
+                .Where(item => item.IsAvailable)
+                .Select(item => new MenuItemResponseDto
+                {
+                    MenuItemId = item.MenuItemId,
+                    FoodName = item.FoodName,
+                    Description = item.Description,
+                    Price = item.Price,
+                    IsAvailable = item.IsAvailable
+                })
+                .ToList()
+        };
+        return dto;
     }
 
     public async Task<MenuResponseDto?> GetTodayAdminMenuAsync()
@@ -125,9 +235,63 @@ public class MenuService
                 x.MenuDate == today);
 
         if (menu == null)
+        {
+            menu = await AutoSeedTodayMenuAsync();
+        }
+
+        if (menu == null)
             return null;
 
+        // Admin sees ALL items (both Active and Inactive) so Admin can toggle and edit them
         return MapMenu(menu);
+    }
+
+    public async Task<MenuItemResponseDto> UpdateMenuItemAsync(int menuItemId, UpdateMenuItemRequest request)
+    {
+        var item = await _context.MenuItems.FirstOrDefaultAsync(i => i.MenuItemId == menuItemId);
+        if (item == null)
+            throw new InvalidOperationException("Menu item not found.");
+
+        if (string.IsNullOrWhiteSpace(request.FoodName))
+            throw new ArgumentException("Food name is required.");
+
+        if (request.Price <= 0)
+            throw new ArgumentException("Price must be greater than zero.");
+
+        item.FoodName = request.FoodName.Trim();
+        item.Description = request.Description?.Trim();
+        item.Price = request.Price;
+        item.IsAvailable = request.IsAvailable;
+
+        await _context.SaveChangesAsync();
+
+        return new MenuItemResponseDto
+        {
+            MenuItemId  = item.MenuItemId,
+            FoodName    = item.FoodName,
+            Description = item.Description,
+            Price       = item.Price,
+            IsAvailable = item.IsAvailable
+        };
+    }
+
+    public async Task<MenuItemResponseDto> ToggleMenuItemAvailabilityAsync(int menuItemId)
+    {
+        var item = await _context.MenuItems.FirstOrDefaultAsync(i => i.MenuItemId == menuItemId);
+        if (item == null)
+            throw new InvalidOperationException("Menu item not found.");
+
+        item.IsAvailable = !item.IsAvailable;
+        await _context.SaveChangesAsync();
+
+        return new MenuItemResponseDto
+        {
+            MenuItemId  = item.MenuItemId,
+            FoodName    = item.FoodName,
+            Description = item.Description,
+            Price       = item.Price,
+            IsAvailable = item.IsAvailable
+        };
     }
 
     public async Task<bool> PublishMenuAsync(int menuId)

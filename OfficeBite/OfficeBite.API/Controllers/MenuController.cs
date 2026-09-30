@@ -174,6 +174,68 @@ public class MenuController : ControllerBase
 
 
     // ==========================================
+    // ADMIN - UPDATE MENU ITEM (EDIT NAME / PRICE / AVAILABILITY)
+    // ==========================================
+
+    [Authorize(Roles = "Admin")]
+    [HttpPut("items/{menuItemId:int}")]
+    [HttpPost("items/{menuItemId:int}")]
+    public async Task<IActionResult> UpdateMenuItem(
+        int menuItemId,
+        [FromBody] UpdateMenuItemRequest request)
+    {
+        try
+        {
+            var updated = await _menuService.UpdateMenuItemAsync(menuItemId, request);
+            return Ok(new { message = "Item updated successfully.", item = updated });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+    }
+
+
+    // ==========================================
+    // ADMIN - TOGGLE ITEM ACTIVE / INACTIVE
+    // ==========================================
+
+    [Authorize(Roles = "Admin")]
+    [HttpPatch("items/{menuItemId:int}/toggle-availability")]
+    [HttpPost("items/{menuItemId:int}/toggle-availability")]
+    public async Task<IActionResult> ToggleMenuItemAvailability(
+        int menuItemId)
+    {
+        try
+        {
+            var updated = await _menuService.ToggleMenuItemAvailabilityAsync(menuItemId);
+            return Ok(new { message = $"Item is now {(updated.IsAvailable ? "Active" : "Inactive")}.", item = updated });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+    }
+
+
+    // ==========================================
+    // ADMIN - RE-SEED / ENSURE STANDARD MENU
+    // ==========================================
+
+    [Authorize(Roles = "Admin")]
+    [HttpPost("admin/reset-standard")]
+    public async Task<IActionResult> ResetStandardMenu()
+    {
+        var menu = await _menuService.AutoSeedTodayMenuAsync();
+        return Ok(new { message = "Standard daily menu loaded successfully.", menu });
+    }
+
+
+    // ==========================================
     // ADMIN - CLOSE ORDERING
     // ==========================================
 

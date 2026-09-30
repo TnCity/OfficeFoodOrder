@@ -16,9 +16,13 @@ if %ERRORLEVEL% NEQ 0 (
     %ADB% connect 192.168.0.44:!PHONE_PORT!
 )
 
-:: Re-verify device connection
-%ADB% devices | findstr /R /C:"device$" >nul
-if %ERRORLEVEL% NEQ 0 (
+:: Get the first online device ID to avoid "more than one device/emulator" error
+set DEVICE_ID=
+for /f "tokens=1" %%d in ('%ADB% devices ^| findstr /R /C:"device$"') do (
+    if "!DEVICE_ID!"=="" set DEVICE_ID=%%d
+)
+
+if "!DEVICE_ID!"=="" (
     echo.
     echo [ERROR] Phone is not connected.
     echo Please make sure:
@@ -28,6 +32,8 @@ if %ERRORLEVEL% NEQ 0 (
     pause
     exit /b 1
 )
+
+echo Target Device: !DEVICE_ID!
 
 echo.
 echo [1/3] Building Android APK...
@@ -40,8 +46,8 @@ if %ERRORLEVEL% NEQ 0 (
 )
 
 echo.
-echo [2/3] Installing APK to phone...
-%ADB% install -r "%~dp0OfficeBite.Mobile\bin\Debug\net9.0-android\com.companyname.officebite.mobile-Signed.apk"
+echo [2/3] Installing APK to phone (!DEVICE_ID!)...
+%ADB% -s !DEVICE_ID! install -r "%~dp0OfficeBite.Mobile\bin\Debug\net9.0-android\com.companyname.officebite.mobile-Signed.apk"
 if %ERRORLEVEL% NEQ 0 (
     echo.
     echo [ERROR] Installation failed!
@@ -51,10 +57,11 @@ if %ERRORLEVEL% NEQ 0 (
 
 echo.
 echo [3/3] Launching App on phone...
-%ADB% shell monkey -p com.companyname.officebite.mobile -c android.intent.category.LAUNCHER 1 >nul 2>&1
+%ADB% -s !DEVICE_ID! shell monkey -p com.companyname.officebite.mobile -c android.intent.category.LAUNCHER 1 >nul 2>&1
 
 echo.
 echo ===================================================
 echo   SUCCESS! App is updated and opened on your phone.
 echo ===================================================
 pause
+

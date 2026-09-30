@@ -134,6 +134,90 @@ public class OrderService
 
 
     // ==========================================
+    // EMPLOYEE - UPDATE/MODIFY PENDING ORDER
+    // ==========================================
+
+    public async Task<OrderResponseDto> UpdateOrderAsync(
+        int userId,
+        int orderId,
+        CreateOrderRequest request)
+    {
+        if (request.Items == null || request.Items.Count == 0)
+        {
+            throw new ArgumentException("Please select at least one food item.");
+        }
+
+        if (request.Items.Any(x => x.Quantity <= 0))
+        {
+            throw new ArgumentException("Quantity must be greater than zero.");
+        }
+
+        var order = await _context.Orders
+            .Include(x => x.OrderItems)
+            .FirstOrDefaultAsync(x => x.OrderId == orderId && x.UserId == userId);
+
+        if (order == null)
+        {
+            throw new ArgumentException("Order not found.");
+        }
+
+        if (order.Status != "Pending")
+        {
+            throw new InvalidOperationException("Order is Under process or completed and cannot be modified.");
+        }
+
+        var menu = await _context.Menus
+            .Include(x => x.MenuItems)
+            .FirstOrDefaultAsync(x => x.MenuId == order.MenuId);
+
+        if (menu == null)
+        {
+            throw new InvalidOperationException("Today's menu is not available.");
+        }
+
+        // Remove old items
+        _context.OrderItems.RemoveRange(order.OrderItems);
+        order.OrderItems.Clear();
+
+        decimal totalAmount = 0;
+        foreach (var requestItem in request.Items)
+        {
+            var menuItem = menu.MenuItems.FirstOrDefault(x => x.MenuItemId == requestItem.MenuItemId);
+            if (menuItem == null)
+            {
+                throw new ArgumentException($"Food item does not belong to today's menu.");
+            }
+
+            if (!menuItem.IsAvailable)
+            {
+                throw new InvalidOperationException($"{menuItem.FoodName} is currently unavailable.");
+            }
+
+            var itemTotal = menuItem.Price * requestItem.Quantity;
+            var orderItem = new OrderItem
+            {
+                MenuItemId = menuItem.MenuItemId,
+                Quantity = requestItem.Quantity,
+                UnitPrice = menuItem.Price,
+                TotalPrice = itemTotal
+            };
+            order.OrderItems.Add(orderItem);
+            totalAmount += itemTotal;
+        }
+
+        order.SpecialInstructions = request.SpecialInstructions?.Trim();
+        order.TotalAmount = totalAmount;
+
+        await _context.SaveChangesAsync();
+
+        await _context.Entry(order).Reference(x => x.User).LoadAsync();
+        await _context.Entry(order).Collection(x => x.OrderItems).Query().Include(x => x.MenuItem).LoadAsync();
+
+        return MapOrder(order);
+    }
+
+
+    // ==========================================
     // EMPLOYEE - OWN ORDER HISTORY
     // ==========================================
 

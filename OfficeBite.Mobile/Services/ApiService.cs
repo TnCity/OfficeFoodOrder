@@ -88,6 +88,38 @@ public class ApiService
         return (response.IsSuccessStatusCode, msg);
     }
 
+    public async Task<(bool Success, string Message)> UpdateMenuItemAsync(int menuItemId, UpdateMenuItemRequest request)
+    {
+        await AuthorizeAsync();
+        var response = await _httpClient.PutAsJsonAsync($"api/Menu/items/{menuItemId}", request);
+        if (response.StatusCode == System.Net.HttpStatusCode.MethodNotAllowed)
+        {
+            response = await _httpClient.PostAsJsonAsync($"api/Menu/items/{menuItemId}", request);
+        }
+        var msg = await SafeReadMessageAsync(response);
+        return (response.IsSuccessStatusCode, msg);
+    }
+
+    public async Task<(bool Success, string Message)> ToggleMenuItemAvailabilityAsync(int menuItemId)
+    {
+        await AuthorizeAsync();
+        var response = await _httpClient.PatchAsync($"api/Menu/items/{menuItemId}/toggle-availability", null);
+        if (response.StatusCode == System.Net.HttpStatusCode.MethodNotAllowed)
+        {
+            response = await _httpClient.PostAsync($"api/Menu/items/{menuItemId}/toggle-availability", null);
+        }
+        var msg = await SafeReadMessageAsync(response);
+        return (response.IsSuccessStatusCode, msg);
+    }
+
+    public async Task<(bool Success, string Message)> ResetStandardMenuAsync()
+    {
+        await AuthorizeAsync();
+        var response = await _httpClient.PostAsync("api/Menu/admin/reset-standard", null);
+        var msg = await SafeReadMessageAsync(response);
+        return (response.IsSuccessStatusCode, msg);
+    }
+
     public async Task<(bool Success, string Message)> CloseOrderingAsync(int menuId)
     {
         await AuthorizeAsync();
@@ -101,6 +133,18 @@ public class ApiService
     {
         await AuthorizeAsync();
         var response = await _httpClient.PostAsJsonAsync("api/Order", request);
+        var msg = await SafeReadMessageAsync(response);
+        return (response.IsSuccessStatusCode, msg);
+    }
+
+    public async Task<(bool Success, string Message)> UpdateOrderAsync(int orderId, CreateOrderRequest request)
+    {
+        await AuthorizeAsync();
+        var response = await _httpClient.PutAsJsonAsync($"api/Order/{orderId}", request);
+        if (response.StatusCode == System.Net.HttpStatusCode.MethodNotAllowed)
+        {
+            response = await _httpClient.PostAsJsonAsync($"api/Order/{orderId}", request);
+        }
         var msg = await SafeReadMessageAsync(response);
         return (response.IsSuccessStatusCode, msg);
     }
@@ -132,7 +176,11 @@ public class ApiService
     public async Task<(bool Success, string Message)> UpdateOrderStatusAsync(int orderId, string status)
     {
         await AuthorizeAsync();
-        var response = await _httpClient.PutAsync($"api/Order/admin/{orderId}/status?status={status}", null);
+        var response = await _httpClient.PutAsync($"api/Order/admin/{orderId}/status?status={Uri.EscapeDataString(status)}", null);
+        if (response.StatusCode == System.Net.HttpStatusCode.MethodNotAllowed)
+        {
+            response = await _httpClient.PostAsync($"api/Order/admin/{orderId}/status?status={Uri.EscapeDataString(status)}", null);
+        }
         var msg = await SafeReadMessageAsync(response);
         return (response.IsSuccessStatusCode, msg);
     }

@@ -65,6 +65,45 @@ public class OrderController : ControllerBase
 
 
     // ==========================================
+    // EMPLOYEE - MODIFY/UPDATE PENDING ORDER
+    // ==========================================
+
+    [Authorize]
+    [HttpPut("{orderId:int}")]
+    [HttpPost("{orderId:int}")]
+    [HttpPost("{orderId:int}/update")]
+    public async Task<IActionResult> UpdateOrder(
+        int orderId,
+        CreateOrderRequest request)
+    {
+        try
+        {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (!int.TryParse(userIdClaim, out var userId))
+            {
+                return Unauthorized();
+            }
+
+            var order = await _orderService.UpdateOrderAsync(
+                userId,
+                orderId,
+                request);
+
+            return Ok(order);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(new { message = ex.Message });
+        }
+    }
+
+
+    // ==========================================
     // EMPLOYEE - MY ORDERS
     // ==========================================
 
@@ -164,9 +203,10 @@ public class OrderController : ControllerBase
 
     [Authorize(Roles = "Admin")]
     [HttpPut("admin/{orderId:int}/status")]
+    [HttpPost("admin/{orderId:int}/status")]
     public async Task<IActionResult> UpdateStatus(
         int orderId,
-        string status)
+        [FromQuery] string status)
     {
         try
         {
@@ -196,8 +236,6 @@ public class OrderController : ControllerBase
                 message = ex.Message
             });
         }
-
-
     }
     [Authorize(Roles = "Admin")]
     [HttpGet("admin/today-summary")]

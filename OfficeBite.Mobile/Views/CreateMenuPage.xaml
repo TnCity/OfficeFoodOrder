@@ -2,73 +2,121 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="OfficeBite.Mobile.Views.CreateMenuPage"
-             Title="Manage Menu"
+             Title="Manage Daily Menu"
              BackgroundColor="#EEF2F6">
 
     <NavigationPage.TitleView>
-        <Grid Padding="0,0,16,0" VerticalOptions="Center">
-            <Label
-        Text="Manage Today's Menu"
-        FontSize="17"
-        FontAttributes="Bold"
-        TextColor="White"
-        VerticalOptions="Center" />
+        <Grid ColumnDefinitions="*,Auto" Padding="0,0,14,0" VerticalOptions="Center">
+            <Label Grid.Column="0"
+                   Text="🍽️ Manage Daily Menu"
+                   FontSize="17"
+                   FontAttributes="Bold"
+                   TextColor="White"
+                   VerticalOptions="Center" />
+            <Button Grid.Column="1"
+                    Text="🔄 Reset 19 Items"
+                    FontSize="11"
+                    FontAttributes="Bold"
+                    BackgroundColor="#581C87"
+                    TextColor="White"
+                    CornerRadius="8"
+                    HeightRequest="32"
+                    Padding="8,0"
+                    Clicked="ResetStandardButton_Clicked" />
         </Grid>
     </NavigationPage.TitleView>
 
     <Grid RowDefinitions="*,Auto">
         <ScrollView Grid.Row="0">
-            <VerticalStackLayout Padding="16" Spacing="12">
+            <VerticalStackLayout Padding="16" Spacing="14">
 
-                <!-- Status Banner if menu exists -->
+                <!-- Status Banner for Today's Menu -->
                 <Border x:Name="ExistingMenuBanner" BackgroundColor="#DCFCE7" StrokeThickness="0" Padding="14,12" IsVisible="False">
                     <Border.StrokeShape>
                         <RoundRectangle CornerRadius="14" />
                     </Border.StrokeShape>
-                    <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" RowSpacing="8">
-                        <VerticalStackLayout Grid.Row="0" Grid.Column="0" Spacing="2" VerticalOptions="Center">
-                            <Label x:Name="BannerTitleLabel" Text="✅ Today's Menu Created" FontSize="14" FontAttributes="Bold" TextColor="#15803D" />
-                            <Label x:Name="ExistingMenuLabel" FontSize="12" TextColor="#166534" />
+                    <Grid ColumnDefinitions="*,Auto">
+                        <VerticalStackLayout Grid.Column="0" Spacing="2" VerticalOptions="Center">
+                            <Label x:Name="BannerTitleLabel" Text="🟢 Today's Menu is Live" FontSize="14" FontAttributes="Bold" TextColor="#15803D" />
+                            <Label x:Name="ExistingMenuLabel" Text="All active items are visible to employees" FontSize="12" TextColor="#166534" />
                         </VerticalStackLayout>
-                        <Button Grid.Row="0" Grid.Column="1"
+                        <Button Grid.Column="1"
                                 x:Name="PublishButton"
                                 Text="🚀 Publish"
-                                FontSize="13"
+                                FontSize="12"
                                 FontAttributes="Bold"
-                                HeightRequest="38"
-                                CornerRadius="10"
+                                HeightRequest="36"
+                                CornerRadius="8"
                                 BackgroundColor="#16A34A"
                                 TextColor="White"
+                                Padding="12,0"
                                 IsVisible="False"
                                 Clicked="PublishButton_Clicked" />
                     </Grid>
                 </Border>
 
-                <!-- Already Saved Items Section (Shown when menu exists) -->
-                <VerticalStackLayout x:Name="SavedItemsSection" Spacing="8" IsVisible="False">
-                    <Label x:Name="SavedItemsHeader"
-                           Text="📋 Saved Menu Items"
-                           FontSize="15"
-                           FontAttributes="Bold"
-                           TextColor="#334155" />
-                    <VerticalStackLayout x:Name="SavedItemsStack" Spacing="6" />
+                <!-- Search Bar for Admin -->
+                <Border BackgroundColor="White" Stroke="#CBD5E1" StrokeThickness="1" Padding="12,0">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="12" />
+                    </Border.StrokeShape>
+                    <Grid ColumnDefinitions="Auto,*,Auto">
+                        <Label Grid.Column="0" Text="🔍" FontSize="15" VerticalOptions="Center" Margin="0,0,8,0" />
+                        <Entry Grid.Column="1"
+                               x:Name="AdminSearchEntry"
+                               Placeholder="Search menu items to edit / toggle..."
+                               FontSize="13"
+                               TextColor="#0F172A"
+                               PlaceholderColor="#94A3B8"
+                               ClearButtonVisibility="WhileEditing"
+                               HeightRequest="42"
+                               TextChanged="AdminSearchEntry_TextChanged" />
+                    </Grid>
+                </Border>
+
+                <!-- Saved Menu Items Section -->
+                <VerticalStackLayout x:Name="SavedItemsSection" Spacing="10" IsVisible="False">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label x:Name="SavedItemsHeader"
+                               Grid.Column="0"
+                               Text="📋 Daily Menu Items"
+                               FontSize="15"
+                               FontAttributes="Bold"
+                               TextColor="#0F172A"
+                               VerticalOptions="Center" />
+                        <Label x:Name="ActiveCountSummaryLabel"
+                               Grid.Column="1"
+                               Text="19 Active"
+                               FontSize="12"
+                               FontAttributes="Bold"
+                               TextColor="#16A34A"
+                               VerticalOptions="Center" />
+                    </Grid>
+
+                    <Label Text="💡 Tip: Mark an item 'Inactive' if not available today. Inactive items will NOT be shown to employees."
+                           FontSize="11"
+                           TextColor="#64748B"
+                           Margin="2,-4,0,2" />
+
+                    <!-- List of current items with Active/Inactive and Edit buttons -->
+                    <VerticalStackLayout x:Name="SavedItemsStack" Spacing="8" />
                 </VerticalStackLayout>
 
                 <!-- New Food Items Header & Add Button -->
-                <Grid ColumnDefinitions="*,Auto" Margin="2,6,2,0">
+                <Grid ColumnDefinitions="*,Auto" Margin="2,10,2,0">
                     <Label x:Name="AddItemsHeaderLabel"
                            Grid.Column="0"
-                           Text=" Add Food Items"
+                           Text="➕ Add New Custom Item"
                            FontSize="15"
                            FontAttributes="Bold"
                            TextColor="#0F172A"
                            VerticalOptions="Center" />
                     <Button Grid.Column="1"
-                            Text="+ Add Item"
-                            FontSize="13"
+                            Text="+ Add Row"
+                            FontSize="12"
                             FontAttributes="Bold"
-                            HeightRequest="36"
-                            CornerRadius="10"
+                            HeightRequest="34"
+                            CornerRadius="8"
                             BackgroundColor="#EDE9FE"
                             TextColor="#7C3AED"
                             Clicked="AddItemButton_Clicked" />
@@ -78,32 +126,33 @@
                 <VerticalStackLayout x:Name="FoodItemsStack" Spacing="10" />
 
                 <!-- Empty Placeholder -->
-                <Border x:Name="NoItemsPlaceholder" BackgroundColor="White" StrokeThickness="0" Padding="20">
+                <Border x:Name="NoItemsPlaceholder" BackgroundColor="White" StrokeThickness="0" Padding="16" IsVisible="False">
                     <Border.StrokeShape>
-                        <RoundRectangle CornerRadius="14" />
+                        <RoundRectangle CornerRadius="12" />
                     </Border.StrokeShape>
-                    <Label Text="Tap '+ Add Item' to add new food items"
-                           FontSize="13"
+                    <Label Text="All standard items are managed above. Tap '+ Add Row' to add custom items."
+                           FontSize="12"
                            TextColor="#94A3B8"
-                           HorizontalOptions="Center" />
+                           HorizontalOptions="Center"
+                           HorizontalTextAlignment="Center" />
                 </Border>
 
             </VerticalStackLayout>
         </ScrollView>
 
-        <!-- Save Button Sticky Footer -->
-        <Border Grid.Row="1" BackgroundColor="White" StrokeThickness="0" Padding="16,14">
+        <!-- Save Button Sticky Footer (only enabled when adding new items or saving changes) -->
+        <Border Grid.Row="1" x:Name="SaveFooterBorder" BackgroundColor="White" StrokeThickness="0" Padding="16,12" IsVisible="False">
             <Border.Shadow>
                 <Shadow Brush="#15000000" Offset="0,-3" Radius="10" Opacity="0.1" />
             </Border.Shadow>
-            <VerticalStackLayout Spacing="8">
+            <VerticalStackLayout Spacing="6">
                 <ActivityIndicator x:Name="LoadingIndicator" IsVisible="False" IsRunning="False" Color="#7C3AED" HorizontalOptions="Center" />
                 <Button x:Name="SaveMenuButton"
-                        Text="💾 Save Menu"
-                        FontSize="15"
+                        Text="💾 Save New Added Items"
+                        FontSize="14"
                         FontAttributes="Bold"
-                        HeightRequest="52"
-                        CornerRadius="14"
+                        HeightRequest="46"
+                        CornerRadius="12"
                         BackgroundColor="#7C3AED"
                         TextColor="White"
                         Clicked="SaveMenuButton_Clicked" />

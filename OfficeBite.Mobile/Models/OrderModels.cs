@@ -1,3 +1,5 @@
+using OfficeBite.Mobile.Helpers;
+
 namespace OfficeBite.Mobile.Models;
 
 public class OrderDto
@@ -15,7 +17,7 @@ public class OrderDto
     public string StatusEmoji => Status switch
     {
         "Pending"   => "⏳ Pending",
-        "Confirmed" => "👍 Confirmed",
+        "Confirmed" => "👨‍🍳 Order is Under process.",
         "Delivered" => "✅ Delivered",
         "Completed" => "✅ Delivered",
         "Cancelled" => "❌ Cancelled",
@@ -29,6 +31,36 @@ public class OrderDto
         "Completed" => Color.FromArgb("#059669"),
         "Cancelled" => Color.FromArgb("#EF4444"),
         _           => Color.FromArgb("#6B7280")
+    };
+
+    public bool CanModify => Status == "Pending";
+
+    public DateTime? CreatedAtDate => DateTimeHelper.ParseToIst(CreatedAt);
+
+    public string CreatedAtFormatted => DateTimeHelper.FormatIstDateTime(CreatedAt);
+
+    public string TimeFormatted => DateTimeHelper.FormatIstTime(CreatedAt);
+
+    public bool IsToday
+    {
+        get
+        {
+            if (CreatedAtDate.HasValue)
+            {
+                return CreatedAtDate.Value.Date == DateTimeHelper.NowIst.Date;
+            }
+            return false;
+        }
+    }
+
+    public string StatusNote => Status switch
+    {
+        "Pending"   => "⏳ Order placed! Waiting for Admin to accept. You can modify your order anytime before it is accepted.",
+        "Confirmed" => "👨‍🍳 Order is Under process. Food is being prepared and will be delivered soon.",
+        "Delivered" => "🎉 Order delivered to you! Enjoy your lunch!",
+        "Completed" => "🎉 Order delivered to you! Enjoy your lunch!",
+        "Cancelled" => "❌ This order was cancelled by Admin. You may place a new order below.",
+        _           => "Order status updated."
     };
 }
 

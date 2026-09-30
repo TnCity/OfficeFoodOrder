@@ -17,7 +17,7 @@ public partial class AdminDashboardPage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-        DateLabel.Text = DateTime.Now.ToString("dddd, dd MMMM yyyy");
+        DateLabel.Text = DateTimeHelper.FormatIstFullDate();
         await LoadSummaryAsync();
     }
 
