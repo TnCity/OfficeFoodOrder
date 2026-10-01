@@ -1,3 +1,4 @@
+using OfficeBite.Mobile.Helpers;
 using OfficeBite.Mobile.Models;
 using OfficeBite.Mobile.Services;
 
@@ -511,7 +512,7 @@ public partial class CreateMenuPage : ContentPage
             }
             else
             {
-                var autoTitle = $"Menu - {DateTime.Now:dd MMM yyyy}";
+                var autoTitle = $"Menu - {DateTimeHelper.NowIst:dd MMM yyyy}";
                 var (success, message) = await _apiService.CreateMenuAsync(
                     new CreateMenuRequest { Title = autoTitle, Items = items });
 

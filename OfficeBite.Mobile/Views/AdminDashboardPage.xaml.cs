@@ -356,6 +356,9 @@ public partial class AdminDashboardPage : ContentPage
     private async void ViewOrdersButton_Clicked(object sender, EventArgs e)
         => await Navigation.PushAsync(new TodayOrdersPage(_apiService));
 
+    private async void OrderSummaryButton_Clicked(object sender, EventArgs e)
+        => await Navigation.PushAsync(new OrderSummaryPage(_apiService));
+
     private async void ManualOrderButton_Clicked(object sender, EventArgs e)
         => await Navigation.PushAsync(new AdminManualOrderPage(_apiService));
 

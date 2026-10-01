@@ -1,4 +1,6 @@
-﻿namespace OfficeBite.DAL.Entities;
+using OfficeBite.Shared.Helpers;
+
+namespace OfficeBite.DAL.Entities;
 
 public class User
 {
@@ -16,7 +18,7 @@ public class User
 
     public bool IsActive { get; set; } = true;
 
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; } = DateTimeHelper.NowIst;
 
     public ICollection<Order> Orders { get; set; }
         = new List<Order>();

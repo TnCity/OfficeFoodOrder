@@ -18,6 +18,11 @@ public partial class TodayOrdersPage : ContentPage
         await Navigation.PopAsync();
     }
 
+    private async void SummaryButton_Clicked(object sender, EventArgs e)
+    {
+        await Navigation.PushAsync(new OrderSummaryPage(_apiService));
+    }
+
     protected override bool OnBackButtonPressed()
     {
         Navigation.PopAsync();

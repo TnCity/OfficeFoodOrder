@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using OfficeBite.DAL.Data;
 using OfficeBite.DAL.Entities;
 using OfficeBite.Shared.DTOs;
+using OfficeBite.Shared.Helpers;
 
 namespace OfficeBite.BLL.Services;
 
@@ -36,9 +37,8 @@ public class OrderService
                 "Quantity must be greater than zero.");
         }
 
-        // Get today's menu
-        var today = DateOnly.FromDateTime(
-            DateTime.UtcNow.AddHours(5.5));
+        // Get today's menu (IST)
+        var today = DateTimeHelper.TodayIst;
 
         var menu = await _context.Menus
             .Include(x => x.MenuItems)
@@ -59,7 +59,7 @@ public class OrderService
             MenuId = menu.MenuId,
             Status = "Pending",
             SpecialInstructions = request.SpecialInstructions?.Trim(),
-            CreatedAt = DateTime.UtcNow,
+            CreatedAt = DateTimeHelper.NowIst,
             TotalAmount = 0
         };
 
@@ -259,8 +259,7 @@ public class OrderService
     public async Task<TodayOrderSummaryDto>
     GetTodaySummaryAsync()
     {
-        var today = DateOnly.FromDateTime(
-            DateTime.UtcNow.AddHours(5.5));
+        var today = DateTimeHelper.TodayIst;
 
         var orders = await _context.Orders
             .Include(x => x.Menu)
@@ -364,8 +363,7 @@ public class OrderService
     public async Task<List<OrderResponseDto>>
         GetTodayOrdersAsync()
     {
-        var today = DateOnly.FromDateTime(
-            DateTime.UtcNow.AddHours(5.5));
+        var today = DateTimeHelper.TodayIst;
 
         var orders = await _context.Orders
             .Include(x => x.User)

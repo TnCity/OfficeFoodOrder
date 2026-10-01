@@ -1,4 +1,6 @@
-﻿namespace OfficeBite.DAL.Entities;
+using OfficeBite.Shared.Helpers;
+
+namespace OfficeBite.DAL.Entities;
 
 public class Menu
 {
@@ -18,7 +20,7 @@ public class Menu
 
     public int CreatedBy { get; set; }
 
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; } = DateTimeHelper.NowIst;
 
     public ICollection<MenuItem> MenuItems { get; set; }
         = new List<MenuItem>();

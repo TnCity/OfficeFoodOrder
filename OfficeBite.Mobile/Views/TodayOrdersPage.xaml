@@ -6,12 +6,22 @@
              BackgroundColor="#EEF2F6">
 
     <NavigationPage.TitleView>
-        <Grid Padding="0,0,16,0" VerticalOptions="Center">
-            <Label Text="Live Orders List"
+        <Grid ColumnDefinitions="*,Auto" Padding="0,0,12,0" VerticalOptions="Center">
+            <Label Grid.Column="0" Text="Live Orders List"
                    FontSize="17"
                    FontAttributes="Bold"
                    TextColor="White"
                    VerticalOptions="Center" />
+            <Button Grid.Column="1"
+                    Text="📊 Summary &amp; PDF"
+                    FontSize="12"
+                    FontAttributes="Bold"
+                    BackgroundColor="#5B21B6"
+                    TextColor="White"
+                    CornerRadius="8"
+                    HeightRequest="32"
+                    Padding="10,0"
+                    Clicked="SummaryButton_Clicked" />
         </Grid>
     </NavigationPage.TitleView>
 

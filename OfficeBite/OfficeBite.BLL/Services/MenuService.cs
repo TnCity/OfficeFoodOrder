@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using OfficeBite.DAL.Data;
 using OfficeBite.DAL.Entities;
 using OfficeBite.Shared.DTOs;
+using OfficeBite.Shared.Helpers;
 
 namespace OfficeBite.BLL.Services;
 
@@ -40,9 +41,8 @@ public class MenuService
                     "Food price must be greater than zero.");
         }
 
-        // India office date
-        var menuDate = DateOnly.FromDateTime(
-            DateTime.UtcNow.AddHours(5.5));
+        // India office date (IST)
+        var menuDate = DateTimeHelper.TodayIst;
 
         var existingMenu = await _context.Menus
             .Include(x => x.MenuItems)
@@ -76,7 +76,7 @@ public class MenuService
             OrderStartTime = request.OrderStartTime,
             OrderEndTime = request.OrderEndTime,
             CreatedBy = createdBy,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTimeHelper.NowIst
         };
 
         foreach (var item in request.Items)
@@ -122,8 +122,7 @@ public class MenuService
 
     public async Task<Menu> AutoSeedTodayMenuAsync()
     {
-        var today = DateOnly.FromDateTime(
-            DateTime.UtcNow.AddHours(5.5));
+        var today = DateTimeHelper.TodayIst;
 
         var existing = await _context.Menus
             .Include(x => x.MenuItems)
@@ -161,7 +160,7 @@ public class MenuService
             IsPublished = true,
             IsOrderingOpen = true,
             CreatedBy = adminId,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTimeHelper.NowIst
         };
 
         foreach (var (foodName, price) in StandardDailyMenuItems)
@@ -182,8 +181,7 @@ public class MenuService
 
     public async Task<MenuResponseDto?> GetTodayMenuAsync()
     {
-        var today = DateOnly.FromDateTime(
-            DateTime.UtcNow.AddHours(5.5));
+        var today = DateTimeHelper.TodayIst;
 
         var menu = await _context.Menus
             .Include(x => x.MenuItems)
@@ -226,8 +224,7 @@ public class MenuService
 
     public async Task<MenuResponseDto?> GetTodayAdminMenuAsync()
     {
-        var today = DateOnly.FromDateTime(
-            DateTime.UtcNow.AddHours(5.5));
+        var today = DateTimeHelper.TodayIst;
 
         var menu = await _context.Menus
             .Include(x => x.MenuItems)
