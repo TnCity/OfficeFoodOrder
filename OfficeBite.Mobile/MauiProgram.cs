@@ -35,6 +35,7 @@ namespace OfficeBite.Mobile
             builder.Services.AddTransient<AdminDashboardPage>();
             builder.Services.AddTransient<CreateMenuPage>();
             builder.Services.AddTransient<TodayOrdersPage>();
+            builder.Services.AddTransient<OrderSummaryPage>();
             builder.Services.AddTransient<AdminManualOrderPage>();
             builder.Services.AddTransient<RegisterEmployeePage>();
 

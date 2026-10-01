@@ -1,3 +1,5 @@
+using OfficeBite.Shared.Helpers;
+
 namespace OfficeBite.DAL.Entities;
 
 public class Order
@@ -14,7 +16,7 @@ public class Order
 
     public string Status { get; set; } = "Pending";
 
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; } = DateTimeHelper.NowIst;
 
 
     // Navigation properties

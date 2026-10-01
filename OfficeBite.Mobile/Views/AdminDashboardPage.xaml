@@ -51,19 +51,8 @@
                             TextColor="White"
                             Clicked="CreateMenuButton_Clicked" />
 
-                    <!-- For Manual Order -->
-                    <Button Grid.Row="1" Grid.ColumnSpan="2"
-                            Text="✍️ Take Manual Order for Employee"
-                            FontSize="14"
-                            FontAttributes="Bold"
-                            HeightRequest="50"
-                            CornerRadius="14"
-                            BackgroundColor="#059669"
-                            TextColor="White"
-                            Clicked="ManualOrderButton_Clicked" />
-
                     <Button Grid.Row="0" Grid.Column="1"
-                            Text="📋 View Order&#10;Orders List"
+                            Text="📋 Orders List&#10;(View Live Orders)"
                             FontSize="13"
                             FontAttributes="Bold"
                             HeightRequest="64"
@@ -72,15 +61,26 @@
                             TextColor="White"
                             Clicked="ViewOrdersButton_Clicked" />
 
-                    <!--<Button Grid.Row="1" Grid.ColumnSpan="2"
-                            Text="👤 Register New Employee"
+                    <Button Grid.Row="1" Grid.Column="0"
+                            Text="📊 Order Summary&#10;(Totals &amp; PDF)"
                             FontSize="13"
                             FontAttributes="Bold"
-                            HeightRequest="48"
-                            CornerRadius="12"
-                            BackgroundColor="#4F46E5"
+                            HeightRequest="64"
+                            CornerRadius="14"
+                            BackgroundColor="#6D28D9"
                             TextColor="White"
-                            Clicked="RegisterEmployeeButton_Clicked" />-->
+                            Clicked="OrderSummaryButton_Clicked" />
+
+                    <!-- For Manual Order -->
+                    <Button Grid.Row="1" Grid.Column="1"
+                            Text="✍️ Manual Order&#10;(For Employee)"
+                            FontSize="13"
+                            FontAttributes="Bold"
+                            HeightRequest="64"
+                            CornerRadius="14"
+                            BackgroundColor="#059669"
+                            TextColor="White"
+                            Clicked="ManualOrderButton_Clicked" />
                 </Grid>
 
                 <!-- Section: Today's Summary -->

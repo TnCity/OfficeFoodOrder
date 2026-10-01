@@ -11,14 +11,23 @@
     <Nullable>enable</Nullable>
     <ApplicationTitle>OfficeBite</ApplicationTitle>
     <ApplicationId>com.companyname.officebite.mobile</ApplicationId>
-    <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
-    <ApplicationVersion>1</ApplicationVersion>
+    <ApplicationDisplayVersion>1.1</ApplicationDisplayVersion>
+    <ApplicationVersion>2</ApplicationVersion>
     <SupportedOSPlatformVersion>21.0</SupportedOSPlatformVersion>
     <!-- Critical for Standalone APK to run without Visual Studio debugger attached -->
     <AndroidUseSharedRuntime>false</AndroidUseSharedRuntime>
     <EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
     <AndroidPackageFormat>apk</AndroidPackageFormat>
     <AndroidEnableSGenConcurrent>true</AndroidEnableSGenConcurrent>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <AndroidPackageFormat>apk</AndroidPackageFormat>
+    <AndroidUseSharedRuntime>false</AndroidUseSharedRuntime>
+    <EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
+    <AndroidLinkMode>SdkOnly</AndroidLinkMode>
+    <AndroidEnableProfiledAot>false</AndroidEnableProfiledAot>
+    <RunAOTCompilation>false</RunAOTCompilation>
   </PropertyGroup>
 
   <ItemGroup>
@@ -44,6 +53,8 @@
     <MauiXaml Update="Views\AdminDashboardPage.xaml"><Generator>MSBuild:Compile</Generator></MauiXaml>
     <MauiXaml Update="Views\CreateMenuPage.xaml"><Generator>MSBuild:Compile</Generator></MauiXaml>
     <MauiXaml Update="Views\TodayOrdersPage.xaml"><Generator>MSBuild:Compile</Generator></MauiXaml>
+    <MauiXaml Update="Views\OrderSummaryPage.xaml"><Generator>MSBuild:Compile</Generator></MauiXaml>
+    <MauiXaml Update="Views\AdminManualOrderPage.xaml"><Generator>MSBuild:Compile</Generator></MauiXaml>
     <MauiXaml Update="Views\RegisterEmployeePage.xaml"><Generator>MSBuild:Compile</Generator></MauiXaml>
   </ItemGroup>
 

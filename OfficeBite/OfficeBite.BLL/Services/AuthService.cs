@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using OfficeBite.DAL.Data;
 using OfficeBite.DAL.Entities;
 using OfficeBite.Shared.DTOs;
+using OfficeBite.Shared.Helpers;
 
 namespace OfficeBite.BLL.Services;
 
@@ -37,7 +38,7 @@ public class AuthService
 
             Role = "Employee",
             IsActive = true,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTimeHelper.NowIst
         };
 
         _context.Users.Add(user);
