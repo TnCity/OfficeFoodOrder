@@ -110,25 +110,18 @@ app.UseAuthentication();
 
 app.UseAuthorization();
 
-// Auto-check and create SpecialInstructions column in Orders table if missing
+// Auto-apply EF migrations on startup (ensures Render always has latest schema)
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<OfficeBiteDbContext>();
     try
     {
-        db.Database.ExecuteSqlRaw(@"
-            IF NOT EXISTS (
-                SELECT * FROM sys.columns 
-                WHERE object_id = OBJECT_ID('Orders') AND name = 'SpecialInstructions'
-            )
-            BEGIN
-                ALTER TABLE Orders ADD SpecialInstructions NVARCHAR(MAX) NULL;
-            END
-        ");
+        db.Database.Migrate();
+        Console.WriteLine("[DB] Migrations applied successfully.");
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"[DB Schema Note]: {ex.Message}");
+        Console.WriteLine($"[DB Migration Error]: {ex.Message}");
     }
 }
 
