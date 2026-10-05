@@ -56,9 +56,13 @@ builder.Services.AddSwaggerGen(options =>
 
 // Database
 builder.Services.AddDbContext<OfficeBiteDbContext>(options =>
+{
     options.UseSqlServer(
         builder.Configuration.GetConnectionString(
-            "DefaultConnection")));
+            "DefaultConnection"));
+    options.ConfigureWarnings(w =>
+        w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
+});
 
 // Business Services
 builder.Services.AddScoped<AuthService>();

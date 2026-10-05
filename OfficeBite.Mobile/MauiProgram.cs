@@ -17,10 +17,10 @@ namespace OfficeBite.Mobile
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 });
 
-            // 🌐 Live Render Cloud API URL (Accessible from anywhere in the world)
+            // 🌐 Live Azure Cloud API URL (Central India)
             builder.Services.AddSingleton(new HttpClient
             {
-                BaseAddress = new Uri("https://officefoodorder.onrender.com/"),
+                BaseAddress = new Uri("https://citybite-asanhuefgjfjfsag.centralindia-01.azurewebsites.net/"),
                 Timeout     = TimeSpan.FromSeconds(60)
             });
 
