@@ -57,7 +57,7 @@ namespace OfficeBite.DAL.Migrations
 
                     b.HasKey("MenuId");
 
-                    b.ToTable("Menus");
+                    b.ToTable("Menus", (string)null);
                 });
 
             modelBuilder.Entity("OfficeBite.DAL.Entities.MenuItem", b =>
@@ -89,7 +89,7 @@ namespace OfficeBite.DAL.Migrations
 
                     b.HasIndex("MenuId");
 
-                    b.ToTable("MenuItems");
+                    b.ToTable("MenuItems", (string)null);
                 });
 
             modelBuilder.Entity("OfficeBite.DAL.Entities.Order", b =>
@@ -123,7 +123,7 @@ namespace OfficeBite.DAL.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Orders");
+                    b.ToTable("Orders", (string)null);
                 });
 
             modelBuilder.Entity("OfficeBite.DAL.Entities.OrderItem", b =>
@@ -157,7 +157,7 @@ namespace OfficeBite.DAL.Migrations
 
                     b.HasIndex("OrderId");
 
-                    b.ToTable("OrderItems");
+                    b.ToTable("OrderItems", (string)null);
                 });
 
             modelBuilder.Entity("OfficeBite.DAL.Entities.User", b =>
@@ -199,7 +199,7 @@ namespace OfficeBite.DAL.Migrations
                     b.HasIndex("Email")
                         .IsUnique();
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("OfficeBite.DAL.Entities.MenuItem", b =>
