@@ -1,0 +1,60 @@
+@model OfficeBite.Shared.DTOs.CreateMenuRequest
+@{
+    ViewData["Title"] = "Create Custom Menu";
+}
+
+<div style="max-width: 650px; margin: 1.5rem auto;">
+    <div style="margin-bottom: 1.5rem;">
+        <a href="/web/menu" style="color: #64748b; text-decoration: none; font-weight: 600; font-size: 0.9rem;">
+            ← Back to Menu
+        </a>
+    </div>
+
+    <div style="background: white; border-radius: 16px; border: 1px solid #e2e8f0; padding: 2rem; box-shadow: 0 4px 25px rgba(0, 0, 0, 0.05);">
+        <h1 style="font-size: 1.5rem; font-weight: 800; color: #0f172a; margin-bottom: 0.25rem;">Create Custom Daily Menu</h1>
+        <p style="color: #64748b; font-size: 0.875rem; margin-bottom: 1.5rem;">Define title and initial food items for today's lunch.</p>
+
+        <form asp-action="Create" method="post" style="display: flex; flex-direction: column; gap: 1.25rem;">
+            @Html.AntiForgeryToken()
+
+            <div>
+                <label style="display: block; font-weight: 600; font-size: 0.85rem; color: #334155; margin-bottom: 0.4rem;">Menu Title</label>
+                <input type="text" name="Title" value="@Model.Title" required placeholder="Daily Lunch Menu" 
+                       style="width: 100%; padding: 0.75rem 1rem; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 0.95rem; outline: none;" />
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div>
+                    <label style="display: block; font-weight: 600; font-size: 0.85rem; color: #334155; margin-bottom: 0.4rem;">Order Start Time (Optional)</label>
+                    <input type="time" name="OrderStartTime" value="@(Model.OrderStartTime?.ToString("HH:mm") ?? "09:00")" 
+                           style="width: 100%; padding: 0.75rem 1rem; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 0.95rem; outline: none;" />
+                </div>
+                <div>
+                    <label style="display: block; font-weight: 600; font-size: 0.85rem; color: #334155; margin-bottom: 0.4rem;">Order End Time (Optional)</label>
+                    <input type="time" name="OrderEndTime" value="@(Model.OrderEndTime?.ToString("HH:mm") ?? "11:30")" 
+                           style="width: 100%; padding: 0.75rem 1rem; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 0.95rem; outline: none;" />
+                </div>
+            </div>
+
+            <div style="border-top: 1px solid #f1f5f9; padding-top: 1.25rem;">
+                <div style="font-weight: 700; color: #0f172a; margin-bottom: 0.75rem;">Default Food Items</div>
+                
+                <div id="items-container" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                    @for (int i = 0; i < Model.Items.Count; i++)
+                    {
+                        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 0.75rem;">
+                            <input type="text" name="Items[@i].FoodName" value="@Model.Items[i].FoodName" required placeholder="Food Item Name" 
+                                   style="padding: 0.65rem 0.85rem; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 0.9rem;" />
+                            <input type="number" step="0.5" name="Items[@i].Price" value="@Model.Items[i].Price" required placeholder="Price (₹)" 
+                                   style="padding: 0.65rem 0.85rem; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 0.9rem;" />
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="padding: 0.8rem; font-size: 1rem; margin-top: 1rem;">
+                Create Menu
+            </button>
+        </form>
+    </div>
+</div>

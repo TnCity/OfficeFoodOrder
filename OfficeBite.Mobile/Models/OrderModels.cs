@@ -86,6 +86,8 @@ public class CreateOrderRequest
 public class CreateOrderItemRequest
 {
     public int MenuItemId { get; set; }
+    public string? FoodName { get; set; }
+    public decimal? UnitPrice { get; set; }
     public int Quantity { get; set; }
 }
 
@@ -124,7 +126,9 @@ public class EmployeeLookupDto
 public class AdminCreateOrderRequest
 {
     public int UserId { get; set; }
+    public string? EmployeeName { get; set; }
     public int MenuId { get; set; }
     public string? SpecialInstructions { get; set; }
     public List<CreateOrderItemRequest> Items { get; set; } = new();
 }
+

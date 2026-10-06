@@ -1,0 +1,55 @@
+@model OfficeBite.Shared.DTOs.RegisterRequest
+@{
+    ViewData["Title"] = "Register Employee";
+}
+
+<div style="max-width: 480px; margin: 3rem auto; background: white; border-radius: 16px; border: 1px solid #e2e8f0; padding: 2rem; box-shadow: 0 4px 25px rgba(0, 0, 0, 0.05);">
+    <div style="text-align: center; margin-bottom: 2rem;">
+        <img src="/images/logo.png" alt="CityBite Logo" style="height: 72px; width: auto; object-fit: contain; margin-bottom: 0.75rem; border-radius: 12px;" />
+        <h1 style="font-size: 1.5rem; font-weight: 800; color: #0f172a;">Create Employee Account</h1>
+        <p style="color: #64748b; font-size: 0.875rem; margin-top: 0.25rem;">Register a new user profile for CityBite office food ordering</p>
+    </div>
+
+    @if (ViewBag.ErrorMessage != null)
+    {
+        <div class="alert alert-danger" style="margin-bottom: 1.25rem;">
+            <span>✖ @ViewBag.ErrorMessage</span>
+        </div>
+    }
+
+    <form asp-action="Register" method="post" style="display: flex; flex-direction: column; gap: 1.1rem;">
+        @Html.AntiForgeryToken()
+
+        <div>
+            <label style="display: block; font-weight: 600; font-size: 0.85rem; color: #334155; margin-bottom: 0.4rem;">Full Name</label>
+            <input type="text" name="FullName" value="@Model.FullName" required " 
+                   style="width: 100%; padding: 0.75rem 1rem; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 0.95rem; outline: none;" />
+        </div>
+
+        <div>
+            <label style="display: block; font-weight: 600; font-size: 0.85rem; color: #334155; margin-bottom: 0.4rem;">Mobile Number</label>
+            <input type="text" name="Mobile" value="@Model.Mobile" required 
+                   style="width: 100%; padding: 0.75rem 1rem; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 0.95rem; outline: none;" />
+        </div>
+
+        <div>
+            <label style="display: block; font-weight: 600; font-size: 0.85rem; color: #334155; margin-bottom: 0.4rem;">Email Address</label>
+            <input type="email" name="Email" value="@Model.Email" required " 
+                   style="width: 100%; padding: 0.75rem 1rem; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 0.95rem; outline: none;" />
+        </div>
+
+        <div>
+            <label style="display: block; font-weight: 600; font-size: 0.85rem; color: #334155; margin-bottom: 0.4rem;">Password (min. 6 characters)</label>
+            <input type="password" name="Password" required " 
+                   style="width: 100%; padding: 0.75rem 1rem; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 0.95rem; outline: none;" />
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="padding: 0.75rem; font-size: 1rem; width: 100%; margin-top: 0.5rem;">
+            Register Account
+        </button>
+    </form>
+
+    <div style="text-align: center; margin-top: 1.5rem; font-size: 0.875rem; color: #64748b; border-top: 1px solid #f1f5f9; padding-top: 1.25rem;">
+        Already registered? <a href="/web/auth/login" style="color: var(--primary); font-weight: 600; text-decoration: none;">Sign In</a>
+    </div>
+</div>

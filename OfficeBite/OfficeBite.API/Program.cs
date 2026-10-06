@@ -8,8 +8,8 @@ using OfficeBite.DAL.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Controllers
-builder.Services.AddControllers();
+// Controllers & Views
+builder.Services.AddControllersWithViews();
 
 // Swagger
 builder.Services.AddEndpointsApiExplorer();
@@ -98,23 +98,24 @@ builder.Services.AddAuthentication(
 
 var app = builder.Build();
 
-// Swagger (enabled for both Development and Render Cloud)
+// Swagger (available at /swagger)
 app.UseSwagger();
 app.UseSwaggerUI(options =>
 {
     options.SwaggerEndpoint(
         "/swagger/v1/swagger.json",
         "OfficeBite API v1");
-    options.RoutePrefix = string.Empty; // Serves Swagger directly at root URL
+    options.RoutePrefix = "swagger"; // Swagger UI at /swagger, leaving / for the Home Web page
 });
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 
 app.UseAuthentication();
 
 app.UseAuthorization();
 
-// Auto-apply EF migrations on startup (ensures Render always has latest schema)
+// Auto-apply EF migrations on startup and ensure Admin users
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<OfficeBiteDbContext>();
@@ -122,13 +123,20 @@ using (var scope = app.Services.CreateScope())
     {
         db.Database.Migrate();
         Console.WriteLine("[DB] Migrations applied successfully.");
+
+        var authService = scope.ServiceProvider.GetRequiredService<AuthService>();
+        await authService.EnsureAdminUsersAsync();
+        Console.WriteLine("[DB] Admin roles verified.");
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"[DB Migration Error]: {ex.Message}");
+        Console.WriteLine($"[DB Startup Error]: {ex.Message}");
     }
 }
 
 app.MapControllers();
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=MenuWeb}/{action=Index}/{id?}");
 
 app.Run();

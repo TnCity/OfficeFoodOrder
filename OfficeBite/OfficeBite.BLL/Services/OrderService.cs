@@ -381,6 +381,187 @@ public class OrderService
 
 
     // ==========================================
+    // ADMIN - CREATE MANUAL ORDER FOR EMPLOYEE
+    // ==========================================
+
+    public async Task<OrderResponseDto> CreateAdminManualOrderAsync(
+        AdminCreateOrderRequest request)
+    {
+        if (request == null)
+            throw new ArgumentException("Order request cannot be null.");
+
+        if (request.Items == null || request.Items.Count == 0)
+            throw new ArgumentException("Please add at least one food item.");
+
+        if (request.Items.Any(x => x.Quantity <= 0))
+            throw new ArgumentException("Item quantities must be greater than zero.");
+
+        // 1. Resolve Employee (User)
+        User? user = null;
+        if (request.UserId.HasValue && request.UserId.Value > 0)
+        {
+            user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == request.UserId.Value);
+        }
+
+        if (user == null && !string.IsNullOrWhiteSpace(request.EmployeeName))
+        {
+            var cleanName = request.EmployeeName.Trim();
+            // Case-insensitive lookup
+            user = await _context.Users
+                .FirstOrDefaultAsync(u => u.FullName.ToLower() == cleanName.ToLower());
+
+            if (user == null)
+            {
+                var slug = System.Text.RegularExpressions.Regex.Replace(cleanName.ToLower(), @"[^a-z0-9]", ".");
+                slug = slug.Trim('.');
+                if (string.IsNullOrEmpty(slug)) slug = "employee";
+
+                var autoEmail = $"{slug}@officebite.local";
+                if (await _context.Users.AnyAsync(u => u.Email == autoEmail))
+                {
+                    autoEmail = $"{slug}.{Random.Shared.Next(100, 999)}@officebite.local";
+                }
+
+                user = new User
+                {
+                    FullName = cleanName,
+                    Email = autoEmail,
+                    Mobile = "9999999999",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("Employee@123"),
+                    Role = "Employee",
+                    IsActive = true,
+                    CreatedAt = DateTimeHelper.NowIst
+                };
+                _context.Users.Add(user);
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        if (user == null)
+        {
+            throw new ArgumentException("Please enter the employee's name.");
+        }
+
+        // 2. Resolve Menu
+        var today = DateTimeHelper.TodayIst;
+        Menu? menu = null;
+
+        if (request.MenuId.HasValue && request.MenuId.Value > 0)
+        {
+            menu = await _context.Menus
+                .Include(m => m.MenuItems)
+                .FirstOrDefaultAsync(m => m.MenuId == request.MenuId.Value);
+        }
+
+        if (menu == null)
+        {
+            menu = await _context.Menus
+                .Include(m => m.MenuItems)
+                .FirstOrDefaultAsync(m => m.MenuDate == today);
+        }
+
+        if (menu == null)
+        {
+            menu = new Menu
+            {
+                MenuDate = today,
+                Title = $"Lunch Menu - {today:dd MMM yyyy}",
+                IsPublished = true,
+                IsOrderingOpen = true,
+                CreatedAt = DateTimeHelper.NowIst
+            };
+            _context.Menus.Add(menu);
+            await _context.SaveChangesAsync();
+        }
+
+        var order = new Order
+        {
+            UserId = user.UserId,
+            MenuId = menu.MenuId,
+            Status = "Confirmed",
+            SpecialInstructions = request.SpecialInstructions?.Trim(),
+            CreatedAt = DateTimeHelper.NowIst,
+            TotalAmount = 0
+        };
+
+        decimal totalAmount = 0;
+
+        foreach (var reqItem in request.Items)
+        {
+            MenuItem? menuItem = null;
+
+            if (reqItem.MenuItemId > 0)
+            {
+                menuItem = menu.MenuItems.FirstOrDefault(m => m.MenuItemId == reqItem.MenuItemId)
+                    ?? await _context.MenuItems.FirstOrDefaultAsync(m => m.MenuItemId == reqItem.MenuItemId);
+            }
+
+            if (menuItem == null)
+            {
+                var dishName = string.IsNullOrWhiteSpace(reqItem.FoodName) ? "Custom Food Item" : reqItem.FoodName.Trim();
+
+                menuItem = menu.MenuItems
+                    .FirstOrDefault(m => m.FoodName.Equals(dishName, StringComparison.OrdinalIgnoreCase));
+
+                if (menuItem == null)
+                {
+                    decimal defaultPrice = (reqItem.UnitPrice.HasValue && reqItem.UnitPrice.Value >= 0)
+                        ? reqItem.UnitPrice.Value
+                        : 0;
+
+                    menuItem = new MenuItem
+                    {
+                        MenuId = menu.MenuId,
+                        FoodName = dishName,
+                        Price = defaultPrice,
+                        IsAvailable = true,
+                        Description = "Custom manual order item"
+                    };
+                    _context.MenuItems.Add(menuItem);
+                    await _context.SaveChangesAsync();
+                    menu.MenuItems.Add(menuItem);
+                }
+            }
+
+            decimal unitPrice = (reqItem.UnitPrice.HasValue && reqItem.UnitPrice.Value >= 0)
+                ? reqItem.UnitPrice.Value
+                : menuItem.Price;
+
+            int qty = reqItem.Quantity > 0 ? reqItem.Quantity : 1;
+            decimal itemTotal = unitPrice * qty;
+
+            var orderItem = new OrderItem
+            {
+                MenuItemId = menuItem.MenuItemId,
+                Quantity = qty,
+                UnitPrice = unitPrice,
+                TotalPrice = itemTotal
+            };
+
+            order.OrderItems.Add(orderItem);
+            totalAmount += itemTotal;
+        }
+
+        order.TotalAmount = totalAmount;
+
+        _context.Orders.Add(order);
+        await _context.SaveChangesAsync();
+
+        await _context.Entry(order)
+            .Reference(x => x.User)
+            .LoadAsync();
+
+        await _context.Entry(order)
+            .Collection(x => x.OrderItems)
+            .Query()
+            .Include(x => x.MenuItem)
+            .LoadAsync();
+
+        return MapOrder(order);
+    }
+
+
+    // ==========================================
     // ADMIN - UPDATE ORDER STATUS
     // ==========================================
 
@@ -388,29 +569,32 @@ public class OrderService
         int orderId,
         string status)
     {
-        var allowedStatuses = new[]
+        if (string.IsNullOrWhiteSpace(status))
+            throw new ArgumentException("Order status cannot be empty.");
+
+        var validStatuses = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            "Pending",
-            "Confirmed",
-            "Delivered",
-            "Completed",
-            "Cancelled"
+            { "Pending", "Pending" },
+            { "Confirmed", "Confirmed" },
+            { "Cooking", "Cooking" },
+            { "Ready", "Ready" },
+            { "Delivered", "Delivered" },
+            { "Completed", "Completed" },
+            { "Cancelled", "Cancelled" }
         };
 
-        if (!allowedStatuses.Contains(status))
+        if (!validStatuses.TryGetValue(status.Trim(), out var canonicalStatus))
         {
-            throw new ArgumentException(
-                "Invalid order status.");
+            throw new ArgumentException($"Invalid order status '{status}'. Allowed statuses are: {string.Join(", ", validStatuses.Values)}");
         }
 
         var order = await _context.Orders
-            .FirstOrDefaultAsync(x =>
-                x.OrderId == orderId);
+            .FirstOrDefaultAsync(x => x.OrderId == orderId);
 
         if (order == null)
             return false;
 
-        order.Status = status;
+        order.Status = canonicalStatus;
 
         await _context.SaveChangesAsync();
 

@@ -198,13 +198,19 @@ public class MenuService
         if (menu == null)
             return null;
 
+        if (!menu.IsOrderingOpen && menu.IsPublished)
+        {
+            menu.IsOrderingOpen = true;
+            await _context.SaveChangesAsync();
+        }
+
         var dto = new MenuResponseDto
         {
             MenuId = menu.MenuId,
             MenuDate = menu.MenuDate,
             Title = menu.Title,
             IsPublished = menu.IsPublished,
-            IsOrderingOpen = menu.IsOrderingOpen,
+            IsOrderingOpen = true,
             OrderStartTime = menu.OrderStartTime,
             OrderEndTime = menu.OrderEndTime,
             Items = menu.MenuItems
@@ -238,6 +244,12 @@ public class MenuService
 
         if (menu == null)
             return null;
+
+        if (!menu.IsOrderingOpen && menu.IsPublished)
+        {
+            menu.IsOrderingOpen = true;
+            await _context.SaveChangesAsync();
+        }
 
         // Admin sees ALL items (both Active and Inactive) so Admin can toggle and edit them
         return MapMenu(menu);
@@ -289,6 +301,36 @@ public class MenuService
             Price       = item.Price,
             IsAvailable = item.IsAvailable
         };
+    }
+
+    public async Task<bool> DeleteMenuItemAsync(int menuItemId)
+    {
+        var item = await _context.MenuItems.FirstOrDefaultAsync(i => i.MenuItemId == menuItemId);
+        if (item == null)
+            return false;
+
+        _context.MenuItems.Remove(item);
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<MenuResponseDto> UpdateMenuDetailsAsync(int menuId, string title, TimeOnly? orderStartTime, TimeOnly? orderEndTime)
+    {
+        var menu = await _context.Menus
+            .Include(x => x.MenuItems)
+            .FirstOrDefaultAsync(x => x.MenuId == menuId);
+
+        if (menu == null)
+            throw new InvalidOperationException("Menu not found.");
+
+        if (!string.IsNullOrWhiteSpace(title))
+            menu.Title = title.Trim();
+
+        menu.OrderStartTime = orderStartTime;
+        menu.OrderEndTime = orderEndTime;
+
+        await _context.SaveChangesAsync();
+        return MapMenu(menu);
     }
 
     public async Task<bool> PublishMenuAsync(int menuId)
