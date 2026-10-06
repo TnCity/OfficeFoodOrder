@@ -227,22 +227,39 @@ public class OrderController : ControllerBase
 
 
     // ==========================================
-    // ADMIN - UPDATE STATUS
+    // ADMIN - UPDATE STATUS (MOBILE APP API)
     // ==========================================
 
     [Authorize(Roles = "Admin")]
     [HttpPut("admin/{orderId:int}/status")]
     [HttpPost("admin/{orderId:int}/status")]
+    [HttpPatch("admin/{orderId:int}/status")]
+    [HttpPut("{orderId:int}/status")]
+    [HttpPost("{orderId:int}/status")]
+    [HttpPatch("{orderId:int}/status")]
     public async Task<IActionResult> UpdateStatus(
         int orderId,
-        [FromQuery] string status)
+        [FromQuery] string? status,
+        [FromBody] UpdateOrderStatusRequest? body = null)
     {
+        var targetStatus = !string.IsNullOrWhiteSpace(status)
+            ? status
+            : body?.Status;
+
+        if (string.IsNullOrWhiteSpace(targetStatus))
+        {
+            return BadRequest(new
+            {
+                message = "Status is required (pass via ?status=... query parameter or JSON body { 'status': '...' })."
+            });
+        }
+
         try
         {
             var result =
                 await _orderService.UpdateStatusAsync(
                     orderId,
-                    status);
+                    targetStatus);
 
             if (!result)
             {
@@ -255,7 +272,7 @@ public class OrderController : ControllerBase
             return Ok(new
             {
                 message =
-                    "Order status updated successfully."
+                    $"Order status updated to '{targetStatus}' successfully."
             });
         }
         catch (ArgumentException ex)
@@ -287,26 +304,7 @@ public class OrderController : ControllerBase
     {
         try
         {
-            if (request.UserId <= 0)
-            {
-                return BadRequest(new
-                {
-                    message = "Please select an employee."
-                });
-            }
-
-            var createRequest = new CreateOrderRequest
-            {
-                MenuId = request.MenuId,
-                SpecialInstructions = request.SpecialInstructions,
-                Items = request.Items
-            };
-
-            var order =
-                await _orderService.CreateOrderAsync(
-                    request.UserId,
-                    createRequest);
-
+            var order = await _orderService.CreateAdminManualOrderAsync(request);
             return Ok(order);
         }
         catch (ArgumentException ex)
@@ -323,5 +321,12 @@ public class OrderController : ControllerBase
                 message = ex.Message
             });
         }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new
+            {
+                message = ex.Message
+            });
+        }
     }
-}
+}

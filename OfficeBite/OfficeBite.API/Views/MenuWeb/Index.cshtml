@@ -1,0 +1,1254 @@
+@model OfficeBite.API.Controllers.MenuWebIndexViewModel
+@{
+    ViewData["Title"] = Model.IsAdmin ? "Daily Menu Management" : "Today's Lunch Menu";
+}
+
+@section Styles {
+    <style>
+        /* Modern Micro-animations & Design Tokens */
+        .menu-hero-card {
+            background: linear-gradient(135deg, #ffffff 0%, #fffbf7 60%, #fff7ed 100%);
+            border: 1px solid #fed7aa;
+            border-radius: 20px;
+            padding: 1.75rem 2rem;
+            margin-bottom: 1.75rem;
+            box-shadow: 0 8px 30px rgba(249, 115, 22, 0.06);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .menu-hero-card::before {
+            content: '';
+            position: absolute;
+            top: -40px;
+            right: -40px;
+            width: 140px;
+            height: 140px;
+            background: radial-gradient(circle, rgba(249, 115, 22, 0.12) 0%, rgba(249, 115, 22, 0) 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        /* Pulse live indicator */
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #16a34a;
+            box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.7);
+            animation: pulse-green 2s infinite;
+            display: inline-block;
+        }
+
+        @@keyframes pulse-green {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(22, 163, 74, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(22, 163, 74, 0); }
+        }
+
+        /* Filter Chips */
+        .filter-chip {
+            padding: 0.45rem 0.9rem;
+            border-radius: 9999px;
+            font-size: 0.825rem;
+            font-weight: 700;
+            border: 1px solid #e2e8f0;
+            background: #ffffff;
+            color: #475569;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            user-select: none;
+        }
+
+        .filter-chip:hover {
+            border-color: #cbd5e1;
+            background: #f8fafc;
+            color: #0f172a;
+        }
+
+        .filter-chip.active {
+            background: #f97316;
+            color: #ffffff;
+            border-color: #f97316;
+            box-shadow: 0 2px 8px rgba(249, 115, 22, 0.25);
+        }
+
+        /* Dish Card */
+        .dish-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 1.15rem 1.35rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1.25rem;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+        }
+
+        .dish-card:hover {
+            border-color: #cbd5e1;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04);
+            transform: translateY(-1px);
+        }
+
+        .dish-card.selected {
+            border-color: #f97316;
+            background: #fffbf7;
+            box-shadow: 0 6px 20px rgba(249, 115, 22, 0.08);
+        }
+
+        /* Dietary Symbols */
+        .diet-badge {
+            width: 17px;
+            height: 17px;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .diet-veg {
+            border: 1.5px solid #16a34a;
+            background: #ffffff;
+        }
+        .diet-veg::after {
+            content: '';
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #16a34a;
+        }
+
+        .diet-nonveg {
+            border: 1.5px solid #dc2626;
+            background: #ffffff;
+        }
+        .diet-nonveg::after {
+            content: '';
+            width: 0;
+            height: 0;
+            border-left: 4.5px solid transparent;
+            border-right: 4.5px solid transparent;
+            border-bottom: 7px solid #dc2626;
+        }
+
+        .diet-egg {
+            border: 1.5px solid #d97706;
+            background: #ffffff;
+        }
+        .diet-egg::after {
+            content: '';
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #d97706;
+        }
+
+        /* Dish Icon Container */
+        .dish-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: #fff7ed;
+            border: 1px solid #ffedd5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.35rem;
+            flex-shrink: 0;
+        }
+
+        /* Stepper Widget */
+        .qty-stepper {
+            display: inline-flex;
+            align-items: center;
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 9999px;
+            padding: 3px;
+            transition: all 0.2s ease;
+        }
+
+        .dish-card.selected .qty-stepper {
+            background: #fff7ed;
+            border-color: #fdba74;
+        }
+
+        .stepper-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            background: #ffffff;
+            color: #334155;
+            font-size: 1.1rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            line-height: 1;
+        }
+
+        .stepper-btn:hover {
+            background: #f1f5f9;
+            color: #0f172a;
+            transform: scale(1.05);
+        }
+
+        .stepper-btn.btn-plus {
+            background: #f97316;
+            color: #ffffff;
+        }
+
+        .stepper-btn.btn-plus:hover {
+            background: #ea580c;
+            box-shadow: 0 2px 8px rgba(249, 115, 22, 0.35);
+        }
+
+        .stepper-qty {
+            width: 34px;
+            text-align: center;
+            font-weight: 800;
+            font-size: 0.95rem;
+            color: #0f172a;
+            border: none;
+            background: transparent;
+            outline: none;
+        }
+
+        /* Search Input */
+        .search-box {
+            position: relative;
+            width: 100%;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.65rem 1rem 0.65rem 2.5rem;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            font-size: 0.875rem;
+            outline: none;
+            background: #ffffff;
+            transition: all 0.2s ease;
+        }
+
+        .search-input:focus {
+            border-color: #f97316 !important;
+            box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.12) !important;
+        }
+
+        /* Quick Instruction Tag */
+        .instruction-tag {
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: #f1f5f9;
+            color: #475569;
+            padding: 0.25rem 0.6rem;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 1px solid #e2e8f0;
+            transition: all 0.15s ease;
+        }
+
+        .instruction-tag:hover {
+            background: #e2e8f0;
+            color: #0f172a;
+        }
+
+        /* Sticky Tray Container */
+        .sticky-tray {
+            position: sticky;
+            top: 85px;
+            background: #ffffff;
+            border-radius: 20px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            padding: 1.5rem;
+        }
+
+        /* Place Order Main CTA */
+        .btn-order-cta {
+            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+            color: #ffffff;
+            border: none;
+            border-radius: 12px;
+            padding: 0.95rem 1.25rem;
+            font-size: 1rem;
+            font-weight: 800;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 15px rgba(249, 115, 22, 0.3);
+        }
+
+        .btn-order-cta:hover:not(:disabled) {
+            background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+            box-shadow: 0 6px 20px rgba(249, 115, 22, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .btn-order-cta:disabled {
+            background: #e2e8f0;
+            color: #94a3b8;
+            box-shadow: none;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Modal Backdrop & Dialog */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal-dialog {
+            background: #ffffff;
+            border-radius: 20px;
+            max-width: 480px;
+            width: 100%;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+            animation: modalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @@keyframes modalPop {
+            0% { transform: scale(0.95); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+}
+
+@{
+    // Helper function to categorize dish dietary & icons
+    string GetDietType(string name)
+    {
+        var lower = name.ToLower();
+        if (lower.Contains("chicken") || lower.Contains("fish") || lower.Contains("mutton") || lower.Contains("meat") || lower.Contains("prawn") || lower.Contains("ragla") || lower.Contains("kari") || lower.Contains("kabab") || lower.Contains("biryani"))
+        {
+            return "nonveg";
+        }
+        if (lower.Contains("egg") || lower.Contains("anda") || lower.Contains("omelet"))
+        {
+            return "egg";
+        }
+        return "veg";
+    }
+
+    string GetDishIcon(string name)
+    {
+        var lower = name.ToLower();
+        if (lower.Contains("fish")) return "🐟";
+        if (lower.Contains("chicken") || lower.Contains("ragla")) return "🍗";
+        if (lower.Contains("egg") || lower.Contains("anda")) return "🥚";
+        if (lower.Contains("paneer")) return "🧀";
+        if (lower.Contains("thali") || lower.Contains("lunch")) return "🍱";
+        if (lower.Contains("rice") || lower.Contains("biryani")) return "🍚";
+        if (lower.Contains("roti") || lower.Contains("naan") || lower.Contains("paratha")) return "🫓";
+        if (lower.Contains("subin") || lower.Contains("paz") || lower.Contains("vagturka") || lower.Contains("sabzi") || lower.Contains("bhaji")) return "🥗";
+        if (lower.Contains("dal") || lower.Contains("cari") || lower.Contains("curry")) return "🍲";
+        return "🍽️";
+    }
+}
+
+<!-- EMPLOYEE ACTIVE ORDER BANNER (If employee has already placed an order today) -->
+@if (Model.ActiveTodayOrder != null)
+{
+    var statusClass = Model.ActiveTodayOrder.Status?.ToLower() switch
+    {
+        "pending" => "badge-pending",
+        "confirmed" => "badge-confirmed",
+        "cooking" => "badge-cooking",
+        "ready" => "badge-ready",
+        "delivered" => "badge-delivered",
+        "cancelled" => "badge-cancelled",
+        _ => "badge-pending"
+    };
+
+    <div style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border: 1.5px solid #86efac; border-radius: 18px; padding: 1.5rem 1.75rem; margin-bottom: 2rem; box-shadow: 0 6px 20px rgba(22, 163, 74, 0.08);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; border-bottom: 1px dashed #86efac; padding-bottom: 1.1rem; margin-bottom: 1.1rem;">
+            <div>
+                <div style="display: inline-flex; align-items: center; gap: 0.45rem; color: #166534; font-weight: 800; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                    <span class="pulse-dot"></span> Active Lunch Order
+                </div>
+                <h3 style="font-size: 1.35rem; font-weight: 800; color: #14532d; margin-top: 0.35rem;">
+                    Order #@Model.ActiveTodayOrder.OrderId
+                </h3>
+            </div>
+            <div style="text-align: right;">
+                <span class="badge @statusClass" style="font-size: 0.85rem; padding: 0.45rem 1rem; border-radius: 9999px;">
+                    ● @Model.ActiveTodayOrder.Status
+                </span>
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.25rem;">
+            <div>
+                <div style="font-size: 0.8rem; color: #166534; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;">Selected Items</div>
+                <div style="font-size: 1rem; font-weight: 700; color: #0f172a; margin-top: 0.25rem;">
+                    @string.Join(" · ", Model.ActiveTodayOrder.Items.Select(i => $"{i.FoodName} x{i.Quantity}"))
+                </div>
+                @if (!string.IsNullOrWhiteSpace(Model.ActiveTodayOrder.SpecialInstructions))
+                {
+                    <div style="font-size: 0.85rem; color: #475569; margin-top: 0.35rem;">
+                        📝 <em>"@Model.ActiveTodayOrder.SpecialInstructions"</em>
+                    </div>
+                }
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 1.25rem;">
+                <div style="text-align: right;">
+                    <div style="font-size: 0.78rem; color: #166534; font-weight: 700; text-transform: uppercase;">Total Billed</div>
+                    <div style="font-size: 1.45rem; font-weight: 800; color: #ea580c;">₹@Model.ActiveTodayOrder.TotalAmount.ToString("N2")</div>
+                </div>
+
+                @if (Model.ActiveTodayOrder.Status == "Pending")
+                {
+                    <form asp-action="CancelMyOrder" method="post" style="display: inline;">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="orderId" value="@Model.ActiveTodayOrder.OrderId" />
+                        <button type="submit" class="btn btn-secondary btn-sm" style="color: #dc2626; border-color: #fca5a5; background: #ffffff; padding: 0.5rem 0.9rem;" onclick="return confirm('Are you sure you want to cancel your order?');">
+                            ✕ Cancel Order
+                        </button>
+                    </form>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+@if (Model.Menu == null)
+{
+    <div style="background: white; border-radius: 20px; padding: 4.5rem 2rem; text-align: center; border: 1px dashed #cbd5e1; box-shadow: 0 6px 25px rgba(0,0,0,0.03);">
+        <div style="font-size: 3.5rem; margin-bottom: 1rem;">🍽️</div>
+        <h3 style="font-size: 1.4rem; font-weight: 800; color: #1e293b;">Today's Menu is Not Available Yet</h3>
+        <p style="color: #64748b; font-size: 0.95rem; margin-top: 0.5rem; margin-bottom: 1.75rem; max-width: 480px; margin-left: auto; margin-right: auto; line-height: 1.5;">
+            @(Model.IsAdmin
+                ? "As an Admin, you can quickly seed the standard daily menu or create a custom menu below."
+                : "The kitchen catering team has not published today's lunch menu yet. Please check back shortly.")
+        </p>
+
+        @if (Model.IsAdmin)
+        {
+            <form asp-action="ResetStandard" method="post" style="display: inline;">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-primary" style="padding: 0.85rem 1.75rem; font-size: 1rem; font-weight: 700; border-radius: 12px;">
+                    🍱 Load Standard Daily Menu
+                </button>
+            </form>
+        }
+    </div>
+}
+else
+{
+    <!-- Top Hero Banner -->
+    <div class="menu-hero-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.25rem;">
+            <div>
+                <div style="display: flex; align-items: center; gap: 0.65rem; margin-bottom: 0.4rem; flex-wrap: wrap;">
+                    <span style="display: inline-flex; align-items: center; gap: 0.4rem; background: #ecfdf5; border: 1px solid #a7f3d0; color: #166534; font-size: 0.75rem; font-weight: 800; padding: 0.3rem 0.75rem; border-radius: 9999px; text-transform: uppercase;">
+                        <span class="pulse-dot"></span> Kitchen Live Catering
+                    </span>
+                    <span class="badge @(Model.IsAdmin ? "badge-cooking" : "badge-confirmed")" style="font-size: 0.75rem;">
+                        @(Model.IsAdmin ? "👑 Admin View" : "👤 Employee Ordering")
+                    </span>
+                    @if (Model.Menu.IsPublished)
+                    {
+                        <span class="badge badge-delivered" style="font-size: 0.75rem;">Published</span>
+                    }
+                    else
+                    {
+                        <span class="badge badge-pending" style="font-size: 0.75rem;">Draft Mode</span>
+                    }
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+                    <h1 style="font-size: 1.85rem; font-weight: 800; color: #0f172a; letter-spacing: -0.02em;">
+                        @Model.Menu.Title
+                    </h1>
+                    @if (Model.IsAdmin)
+                    {
+                        <button type="button" onclick="openEditMenuModal('@Model.Menu.MenuId', '@Html.Raw(Model.Menu.Title.Replace("'", "\\'"))', '@(Model.Menu.OrderStartTime?.ToString(@"hh\:mm") ?? "")', '@(Model.Menu.OrderEndTime?.ToString(@"hh\:mm") ?? "")')" 
+                                class="btn btn-secondary btn-sm" style="font-size: 0.78rem; padding: 0.3rem 0.65rem; border-radius: 8px;">
+                            ✏️ Edit Title & Times
+                        </button>
+                    }
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 1.25rem; margin-top: 0.5rem; color: #64748b; font-size: 0.875rem; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 0.35rem;">
+                        <span>📅</span> <strong>@Model.Menu.MenuDate.ToString("dddd, MMMM dd, yyyy")</strong>
+                    </div>
+                    @if (Model.Menu.OrderStartTime.HasValue && Model.Menu.OrderEndTime.HasValue)
+                    {
+                        <div style="display: flex; align-items: center; gap: 0.35rem;">
+                            <span>⏰</span> <span>Ordering Window: <strong>@Model.Menu.OrderStartTime.Value.ToString("hh:mm tt") - @Model.Menu.OrderEndTime.Value.ToString("hh:mm tt")</strong></span>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            @if (Model.IsAdmin && !Model.Menu.IsPublished)
+            {
+                <form asp-action="Publish" method="post" style="display: inline;">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="menuId" value="@Model.Menu.MenuId" />
+                    <button type="submit" class="btn btn-primary" style="padding: 0.75rem 1.5rem; font-weight: 700; border-radius: 12px;">
+                        🚀 Publish Menu to Employees
+                    </button>
+                </form>
+            }
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- 1. ADMIN VIEW (Admin controls: Add Item, Edit Dish, Toggle Disable/Enable, Delete) -->
+    <!-- ========================================================================= -->
+    @if (Model.IsAdmin)
+    {
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; align-items: start;">
+            <div style="background: white; border-radius: 20px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);">
+                <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+                    <div>
+                        <h3 style="font-weight: 800; font-size: 1.1rem; color: #0f172a;">Menu Items Inventory</h3>
+                        <p style="font-size: 0.825rem; color: #64748b; margin-top: 0.15rem;">Edit names, prices, and status for today's dishes (<span id="adminDishCount">@Model.Menu.Items.Count</span> items)</p>
+                    </div>
+                    <div style="max-width: 240px; width: 100%;">
+                        <div class="search-box">
+                            <input type="text" id="adminMenuSearch" placeholder="Search dish..." oninput="filterAdminMenu()" class="search-input" />
+                            <span style="position: absolute; left: 0.85rem; top: 50%; transform: translateY(-50%); font-size: 0.85rem; color: #94a3b8; pointer-events: none;">🔍</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
+                        <thead>
+                            <tr style="background: #f8fafc; border-bottom: 1px solid #e2e8f0; color: #475569; font-weight: 700; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                                <th style="padding: 0.9rem 1.25rem;">Dish Details</th>
+                                <th style="padding: 0.9rem 1rem;">Type</th>
+                                <th style="padding: 0.9rem 1rem;">Price</th>
+                                <th style="padding: 0.9rem 1rem;">Status</th>
+                                <th style="padding: 0.9rem 1.25rem; text-align: right;">Admin Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.Menu.Items)
+                            {
+                                var diet = GetDietType(item.FoodName);
+                                var icon = GetDishIcon(item.FoodName);
+
+                                <tr class="admin-menu-row" data-name="@item.FoodName.ToLower()" style="border-bottom: 1px solid #f1f5f9; transition: background 0.15s ease;">
+                                    <td style="padding: 0.9rem 1.25rem;">
+                                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                            <div class="dish-avatar" style="width: 36px; height: 36px; font-size: 1.1rem; border-radius: 8px;">@icon</div>
+                                            <div>
+                                                <div style="font-weight: 700; color: #0f172a;">@item.FoodName</div>
+                                                @if (!string.IsNullOrWhiteSpace(item.Description))
+                                                {
+                                                    <div style="font-size: 0.78rem; color: #64748b;">@item.Description</div>
+                                                }
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style="padding: 0.9rem 1rem;">
+                                        @if (diet == "veg")
+                                        {
+                                            <span style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.8rem; font-weight: 600; color: #166534;">
+                                                <span class="diet-badge diet-veg"></span> Veg
+                                            </span>
+                                        }
+                                        else if (diet == "egg")
+                                        {
+                                            <span style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.8rem; font-weight: 600; color: #92400e;">
+                                                <span class="diet-badge diet-egg"></span> Egg
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.8rem; font-weight: 600; color: #991b1b;">
+                                                <span class="diet-badge diet-nonveg"></span> Non-Veg
+                                            </span>
+                                        }
+                                    </td>
+                                    <td style="padding: 0.9rem 1rem; font-weight: 800; color: #f97316; font-size: 0.95rem;">
+                                        ₹@item.Price.ToString("N2")
+                                    </td>
+                                    <td style="padding: 0.9rem 1rem;">
+                                        @if (item.IsAvailable)
+                                        {
+                                            <span class="badge badge-delivered" style="font-size: 0.72rem;">Available</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-cancelled" style="font-size: 0.72rem;">Disabled</span>
+                                        }
+                                    </td>
+                                    <td style="padding: 0.9rem 1.25rem; text-align: right;">
+                                        <div style="display: inline-flex; align-items: center; gap: 0.4rem;">
+                                            <!-- Edit Button -->
+                                            <button type="button" class="btn btn-secondary btn-sm" 
+                                                    onclick="openEditDishModal(@item.MenuItemId, '@Html.Raw(item.FoodName.Replace("'", "\\'"))', '@Html.Raw((item.Description ?? "").Replace("'", "\\'"))', @item.Price, @item.IsAvailable.ToString().ToLower())"
+                                                    style="font-size: 0.78rem; padding: 0.35rem 0.65rem; background: #f8fafc;" title="Edit Dish">
+                                                ✏️ Edit
+                                            </button>
+
+                                            <!-- Toggle Availability -->
+                                            <form asp-action="ToggleItem" asp-route-id="@item.MenuItemId" method="post" style="display: inline;">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-secondary btn-sm" style="font-size: 0.78rem; padding: 0.35rem 0.65rem;">
+                                                    @(item.IsAvailable ? "Disable" : "Enable")
+                                                </button>
+                                            </form>
+
+                                            <!-- Delete Dish -->
+                                            <form asp-action="DeleteItem" asp-route-id="@item.MenuItemId" method="post" style="display: inline;" onsubmit="return confirm('Are you sure you want to remove @Html.Raw(item.FoodName.Replace("'", "\\'")) from today\'s menu?');">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-secondary btn-sm" style="font-size: 0.78rem; padding: 0.35rem 0.55rem; color: #dc2626; border-color: #fecaca;" title="Delete Dish">
+                                                    🗑️
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                            <tr id="adminNoResultsRow" style="display: none;">
+                                <td colspan="5" style="padding: 3rem 1.5rem; text-align: center; color: #64748b;">
+                                    <div style="font-size: 2rem; margin-bottom: 0.4rem;">🔍</div>
+                                    <div style="font-weight: 700; font-size: 1rem; color: #1e293b;">No matching food items found</div>
+                                    <div style="font-size: 0.825rem; color: #94a3b8; margin-top: 0.2rem;">Try typing a different food name.</div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Add Item Panel (Admin Only) -->
+            <div style="background: white; border-radius: 20px; border: 1px solid #e2e8f0; padding: 1.5rem; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);">
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.35rem;">
+                    <span style="background: #fff7ed; color: #f97316; font-size: 1.1rem; padding: 0.3rem 0.5rem; border-radius: 8px;">🍱</span>
+                    <h3 style="font-size: 1.15rem; font-weight: 800; color: #0f172a;">Add Menu Item</h3>
+                </div>
+                <p style="color: #64748b; font-size: 0.85rem; margin-bottom: 1.25rem;">Instantly add dishes to today's lunch catering list.</p>
+
+                <form asp-action="AddItem" method="post" style="display: flex; flex-direction: column; gap: 1rem;">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="menuId" value="@Model.Menu.MenuId" />
+
+                    <div>
+                        <label style="display: block; font-weight: 700; font-size: 0.825rem; color: #334155; margin-bottom: 0.35rem;">Food Item Name</label>
+                        <input type="text" name="foodName" required placeholder="e.g. Mutton Biryani / Paneer Butter"
+                               style="width: 100%; padding: 0.65rem 0.85rem; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 0.9rem; outline: none;" />
+                    </div>
+
+                    <div>
+                        <label style="display: block; font-weight: 700; font-size: 0.825rem; color: #334155; margin-bottom: 0.35rem;">Description / Portion (Optional)</label>
+                        <input type="text" name="description" placeholder="e.g. Served with salad & raita"
+                               style="width: 100%; padding: 0.65rem 0.85rem; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 0.9rem; outline: none;" />
+                    </div>
+
+                    <div>
+                        <label style="display: block; font-weight: 700; font-size: 0.825rem; color: #334155; margin-bottom: 0.35rem;">Price in INR (₹)</label>
+                        <input type="number" step="0.5" name="price" required placeholder="e.g. 80"
+                               style="width: 100%; padding: 0.65rem 0.85rem; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 0.9rem; outline: none;" />
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.75rem; border-radius: 10px; font-weight: 700; margin-top: 0.25rem;">
+                        + Add to Today's Menu
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- ADMIN MODAL: EDIT DISH -->
+        <!-- ========================================================================= -->
+        <div id="editDishModal" class="modal-backdrop">
+            <div class="modal-dialog">
+                <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="font-size: 1.2rem;">✏️</span>
+                        <h3 style="font-weight: 800; font-size: 1.15rem; color: #0f172a;">Edit Food Dish</h3>
+                    </div>
+                    <button type="button" onclick="closeEditDishModal()" style="background: none; border: none; font-size: 1.2rem; color: #94a3b8; cursor: pointer;">✕</button>
+                </div>
+
+                <form asp-action="UpdateItem" method="post" style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1.1rem;">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="editMenuItemId" name="MenuItemId" />
+
+                    <div>
+                        <label style="display: block; font-weight: 700; font-size: 0.825rem; color: #334155; margin-bottom: 0.35rem;">Food Name</label>
+                        <input type="text" id="editFoodName" name="FoodName" required
+                               style="width: 100%; padding: 0.65rem 0.85rem; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 0.9rem; outline: none;" />
+                    </div>
+
+                    <div>
+                        <label style="display: block; font-weight: 700; font-size: 0.825rem; color: #334155; margin-bottom: 0.35rem;">Description / Portion (Optional)</label>
+                        <input type="text" id="editDescription" name="Description"
+                               style="width: 100%; padding: 0.65rem 0.85rem; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 0.9rem; outline: none;" />
+                    </div>
+
+                    <div>
+                        <label style="display: block; font-weight: 700; font-size: 0.825rem; color: #334155; margin-bottom: 0.35rem;">Price (₹)</label>
+                        <input type="number" step="0.5" id="editPrice" name="Price" required
+                               style="width: 100%; padding: 0.65rem 0.85rem; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 0.9rem; outline: none;" />
+                    </div>
+
+                    <div style="display: flex; align-items: center; gap: 0.6rem; background: #f8fafc; padding: 0.75rem 1rem; border-radius: 10px; border: 1px solid #e2e8f0;">
+                        <input type="hidden" name="IsAvailable" value="false" />
+                        <input type="checkbox" id="editIsAvailable" name="IsAvailable" value="true" style="width: 18px; height: 18px; accent-color: #f97316;" />
+                        <label for="editIsAvailable" style="font-weight: 700; font-size: 0.875rem; color: #334155; cursor: pointer;">Available for Ordering Today</label>
+                    </div>
+
+                    <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 0.5rem;">
+                        <button type="button" onclick="closeEditDishModal()" class="btn btn-secondary" style="padding: 0.65rem 1.25rem;">Cancel</button>
+                        <button type="submit" class="btn btn-primary" style="padding: 0.65rem 1.5rem; font-weight: 700;">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- ADMIN MODAL: EDIT MENU INFO (Title & Ordering Times) -->
+        <!-- ========================================================================= -->
+        <div id="editMenuModal" class="modal-backdrop">
+            <div class="modal-dialog">
+                <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="font-size: 1.2rem;">📋</span>
+                        <h3 style="font-weight: 800; font-size: 1.15rem; color: #0f172a;">Edit Menu Details</h3>
+                    </div>
+                    <button type="button" onclick="closeEditMenuModal()" style="background: none; border: none; font-size: 1.2rem; color: #94a3b8; cursor: pointer;">✕</button>
+                </div>
+
+                <form asp-action="UpdateMenuDetails" method="post" style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1.1rem;">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="editMenuId" name="MenuId" />
+
+                    <div>
+                        <label style="display: block; font-weight: 700; font-size: 0.825rem; color: #334155; margin-bottom: 0.35rem;">Menu Title</label>
+                        <input type="text" id="editMenuTitle" name="Title" required
+                               style="width: 100%; padding: 0.65rem 0.85rem; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 0.9rem; outline: none;" />
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div>
+                            <label style="display: block; font-weight: 700; font-size: 0.825rem; color: #334155; margin-bottom: 0.35rem;">Order Start Time</label>
+                            <input type="time" id="editStartTime" name="StartTime"
+                                   style="width: 100%; padding: 0.65rem 0.85rem; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 0.9rem; outline: none;" />
+                        </div>
+                        <div>
+                            <label style="display: block; font-weight: 700; font-size: 0.825rem; color: #334155; margin-bottom: 0.35rem;">Order End Time</label>
+                            <input type="time" id="editEndTime" name="EndTime"
+                                   style="width: 100%; padding: 0.65rem 0.85rem; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 0.9rem; outline: none;" />
+                        </div>
+                    </div>
+
+                    <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 0.5rem;">
+                        <button type="button" onclick="closeEditMenuModal()" class="btn btn-secondary" style="padding: 0.65rem 1.25rem;">Cancel</button>
+                        <button type="submit" class="btn btn-primary" style="padding: 0.65rem 1.5rem; font-weight: 700;">Update Menu</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- ========================================================================= -->
+        <!-- 2. EMPLOYEE FOOD ORDERING VIEW (Place Order with live quantity calculation) -->
+        <!-- ========================================================================= -->
+        var availableItems = Model.Menu.Items.Where(i => i.IsAvailable).ToList();
+
+        if (!availableItems.Any())
+        {
+            <div style="background: white; border-radius: 20px; padding: 4rem 2rem; text-align: center; border: 1px dashed #cbd5e1;">
+                <div style="font-size: 3rem; margin-bottom: 0.5rem;">🥡</div>
+                <h3 style="font-size: 1.25rem; font-weight: 700; color: #0f172a;">All Food Items Are Sold Out</h3>
+                <p style="color: #64748b; font-size: 0.9rem; margin-top: 0.35rem;">The kitchen has closed orders or dishes are currently unavailable.</p>
+            </div>
+        }
+        else
+        {
+            <form asp-action="PlaceOrder" method="post" id="orderForm">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="MenuId" value="@Model.Menu.MenuId" />
+
+                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.75rem; align-items: start;">
+                    
+                    <!-- Left Column: Search, Filters & Dishes Grid -->
+                    <div>
+                        <!-- Search Bar & Dietary Filter Toolbar -->
+                        <div style="background: white; border-radius: 16px; border: 1px solid #e2e8f0; padding: 1.1rem 1.25rem; margin-bottom: 1.25rem; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);">
+                            <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+                                <div class="search-box" style="flex: 1; min-width: 220px;">
+                                    <input type="text" id="employeeMenuSearch" placeholder="Search dishes (e.g. Fish, Paneer, Egg, Roti)..." oninput="filterEmployeeMenu()" class="search-input" />
+                                    <span style="position: absolute; left: 0.85rem; top: 50%; transform: translateY(-50%); font-size: 0.85rem; color: #94a3b8; pointer-events: none;">🔍</span>
+                                    <button type="button" id="clearSearchBtn" onclick="clearSearch()" style="position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: #94a3b8; font-size: 0.85rem; cursor: pointer; display: none;">✕</button>
+                                </div>
+                                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                    <button type="button" class="filter-chip active" id="chip-all" onclick="setDietFilter('all')">
+                                        🍽️ All (<span id="empDishCount">@availableItems.Count</span>)
+                                    </button>
+                                    <button type="button" class="filter-chip" id="chip-veg" onclick="setDietFilter('veg')">
+                                        <span class="diet-badge diet-veg"></span> Veg
+                                    </button>
+                                    <button type="button" class="filter-chip" id="chip-nonveg" onclick="setDietFilter('nonveg')">
+                                        <span class="diet-badge diet-nonveg"></span> Non-Veg
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Dish Cards List -->
+                        <div id="employeeDishesList" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                            @for (int i = 0; i < availableItems.Count; i++)
+                            {
+                                var item = availableItems[i];
+                                var diet = GetDietType(item.FoodName);
+                                var icon = GetDishIcon(item.FoodName);
+
+                                <div class="dish-card employee-dish-item" id="dishCard_@i" data-index="@i" data-name="@item.FoodName.ToLower() @(item.Description?.ToLower() ?? "")" data-diet="@diet">
+                                    <div style="display: flex; align-items: center; gap: 1rem; flex: 1;">
+                                        <!-- Dish Icon Avatar -->
+                                        <div class="dish-avatar">
+                                            @icon
+                                        </div>
+
+                                        <!-- Dish Info -->
+                                        <div style="flex: 1;">
+                                            <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                                                @if (diet == "veg")
+                                                {
+                                                    <span class="diet-badge diet-veg" title="Pure Vegetarian"></span>
+                                                }
+                                                else if (diet == "egg")
+                                                {
+                                                    <span class="diet-badge diet-egg" title="Contains Egg"></span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="diet-badge diet-nonveg" title="Non-Vegetarian"></span>
+                                                }
+
+                                                <span style="font-weight: 800; font-size: 1.05rem; color: #0f172a;">@item.FoodName</span>
+                                            </div>
+
+                                            @if (!string.IsNullOrWhiteSpace(item.Description))
+                                            {
+                                                <div style="font-size: 0.825rem; color: #64748b; margin-top: 0.2rem;">@item.Description</div>
+                                            }
+
+                                            <div style="display: flex; align-items: center; gap: 0.6rem; margin-top: 0.35rem;">
+                                                <span style="font-weight: 800; font-size: 1.05rem; color: #ea580c;">
+                                                    ₹@item.Price.ToString("N2")
+                                                </span>
+                                                <span style="font-size: 0.75rem; color: #94a3b8; font-weight: 600;">/ portion</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Interactive Stepper -->
+                                    <div>
+                                        <input type="hidden" name="Items[@i].MenuItemId" value="@item.MenuItemId" />
+
+                                        <div class="qty-stepper">
+                                            <button type="button" class="stepper-btn" onclick="adjustQty(@i, -1, @item.Price)" title="Decrease portion">
+                                                −
+                                            </button>
+
+                                            <input type="number" id="qty_@i" name="Items[@i].Quantity" value="0" min="0" max="20" readonly class="stepper-qty" />
+
+                                            <button type="button" class="stepper-btn btn-plus" onclick="adjustQty(@i, 1, @item.Price)" title="Add portion">
+                                                +
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+
+                            <!-- Empty search state -->
+                            <div id="empNoResults" style="display: none; background: white; border-radius: 16px; border: 1px dashed #cbd5e1; padding: 3rem 1.5rem; text-align: center; color: #64748b;">
+                                <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🔍</div>
+                                <div style="font-weight: 800; font-size: 1.1rem; color: #1e293b;">No dishes match your search or filter</div>
+                                <div style="font-size: 0.85rem; color: #94a3b8; margin-top: 0.25rem;">Try clearing the search or switching dietary filters.</div>
+                                <button type="button" onclick="resetFilters()" class="btn btn-secondary btn-sm" style="margin-top: 1rem;">
+                                    Reset Filters
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Sticky Order Tray Summary -->
+                    <div class="sticky-tray">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.1rem; padding-bottom: 0.85rem; border-bottom: 1px solid #f1f5f9;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <span style="font-size: 1.25rem;">🍱</span>
+                                <h3 style="font-size: 1.15rem; font-weight: 800; color: #0f172a;">Your Lunch Tray</h3>
+                            </div>
+                            <span id="trayBadgeCount" style="background: #fff7ed; color: #f97316; font-size: 0.78rem; font-weight: 800; padding: 0.25rem 0.65rem; border-radius: 9999px; border: 1px solid #fed7aa;">
+                                0 items
+                            </span>
+                        </div>
+
+                        <!-- Live Selected Items Container -->
+                        <div id="trayEmptyState" style="padding: 1.75rem 1rem; text-align: center; color: #94a3b8; background: #f8fafc; border-radius: 12px; border: 1px dashed #e2e8f0; margin-bottom: 1.25rem;">
+                            <div style="font-size: 2.25rem; margin-bottom: 0.35rem;">🥡</div>
+                            <div style="font-weight: 700; font-size: 0.9rem; color: #475569;">Your tray is empty</div>
+                            <div style="font-size: 0.78rem; color: #94a3b8; margin-top: 0.2rem;">Tap <strong>+</strong> on any dish to add portions</div>
+                        </div>
+
+                        <div id="traySelectedList" style="display: none; flex-direction: column; gap: 0.5rem; max-height: 220px; overflow-y: auto; margin-bottom: 1.25rem; padding-right: 2px;">
+                            <!-- Dynamically populated via JS -->
+                        </div>
+
+                        <!-- Bill Breakdown Box -->
+                        <div style="background: #f8fafc; border-radius: 14px; border: 1px solid #e2e8f0; padding: 1.1rem; margin-bottom: 1.25rem;">
+                            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #64748b; margin-bottom: 0.45rem;">
+                                <span>Selected Portions</span>
+                                <strong id="totalPortionsCount" style="color: #0f172a;">0 portions</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #64748b; margin-bottom: 0.65rem;">
+                                <span>Cafeteria Delivery</span>
+                                <span style="color: #16a34a; font-weight: 700;">FREE (Office Subsidy)</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: baseline; font-size: 1.15rem; font-weight: 800; color: #0f172a; border-top: 1px dashed #cbd5e1; padding-top: 0.75rem;">
+                                <span>Total Payable</span>
+                                <span id="totalPriceDisplay" style="color: #ea580c; font-size: 1.35rem;">₹0.00</span>
+                            </div>
+                        </div>
+
+                        <!-- Special Instructions -->
+                        <div style="margin-bottom: 1.25rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+                                <label style="font-weight: 700; font-size: 0.825rem; color: #334155;">Kitchen Note (Optional)</label>
+                            </div>
+                            <textarea id="specialInstructionsInput" name="SpecialInstructions" rows="2" placeholder="e.g. Less spicy, keep chutney separate..."
+                                      style="width: 100%; padding: 0.65rem 0.85rem; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 0.85rem; outline: none; resize: vertical; font-family: inherit;"></textarea>
+                            
+                            <!-- Quick Chips -->
+                            <div style="display: flex; gap: 0.35rem; flex-wrap: wrap; margin-top: 0.45rem;">
+                                <span class="instruction-tag" onclick="appendNote('Less spicy')">🌶️ Less spicy</span>
+                                <span class="instruction-tag" onclick="appendNote('Extra gravy')">🍲 Extra gravy</span>
+                                <span class="instruction-tag" onclick="appendNote('Pack separately')">📦 Separate</span>
+                            </div>
+                        </div>
+
+                        <!-- Submit CTA Button -->
+                        @if (Model.IsLoggedIn)
+                        {
+                            <button type="submit" id="submitOrderBtn" class="btn-order-cta" disabled>
+                                <span>Select Dishes to Order</span>
+                            </button>
+                        }
+                        else
+                        {
+                            <a href="/web/auth/login" class="btn-order-cta" style="text-decoration: none;">
+                                <span>🔐 Sign In to Place Order</span>
+                            </a>
+                        }
+
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 0.4rem; color: #94a3b8; font-size: 0.75rem; margin-top: 0.85rem;">
+                            <span>🔒</span> Instant kitchen notification upon order
+                        </div>
+                    </div>
+                </div>
+            </form>
+        }
+    }
+}
+
+@section Scripts {
+    <script>
+        const itemData = {};
+        const quantities = {};
+        let activeDietFilter = 'all';
+
+        @if (!Model.IsAdmin && Model.Menu != null)
+        {
+            var avItems = Model.Menu.Items.Where(i => i.IsAvailable).ToList();
+            for (int i = 0; i < avItems.Count; i++)
+            {
+                var food = avItems[i];
+                var diet = GetDietType(food.FoodName);
+                var icon = GetDishIcon(food.FoodName);
+                <text>
+                    itemData[@i] = {
+                        name: "@food.FoodName",
+                        price: @food.Price,
+                        diet: "@diet",
+                        icon: "@icon"
+                    };
+                    quantities[@i] = 0;
+                </text>
+            }
+        }
+
+        // ==========================================
+        // ADMIN MODAL HANDLERS
+        // ==========================================
+        function openEditDishModal(id, name, desc, price, available) {
+            document.getElementById('editMenuItemId').value = id;
+            document.getElementById('editFoodName').value = name;
+            document.getElementById('editDescription').value = desc || '';
+            document.getElementById('editPrice').value = price;
+            document.getElementById('editIsAvailable').checked = (available === true || available === 'true');
+            
+            const modal = document.getElementById('editDishModal');
+            if (modal) modal.style.display = 'flex';
+        }
+
+        function closeEditDishModal() {
+            const modal = document.getElementById('editDishModal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        function openEditMenuModal(id, title, startTime, endTime) {
+            document.getElementById('editMenuId').value = id;
+            document.getElementById('editMenuTitle').value = title;
+            document.getElementById('editStartTime').value = startTime || '';
+            document.getElementById('editEndTime').value = endTime || '';
+
+            const modal = document.getElementById('editMenuModal');
+            if (modal) modal.style.display = 'flex';
+        }
+
+        function closeEditMenuModal() {
+            const modal = document.getElementById('editMenuModal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        // Close modals when clicking backdrop
+        window.onclick = function(event) {
+            const dishModal = document.getElementById('editDishModal');
+            const menuModal = document.getElementById('editMenuModal');
+            if (event.target === dishModal) dishModal.style.display = 'none';
+            if (event.target === menuModal) menuModal.style.display = 'none';
+        };
+
+        // ==========================================
+        // ADMIN SEARCH FILTER
+        // ==========================================
+        function filterAdminMenu() {
+            const input = document.getElementById('adminMenuSearch');
+            const filter = input ? input.value.toLowerCase().trim() : '';
+            const rows = document.querySelectorAll('.admin-menu-row');
+            const noResults = document.getElementById('adminNoResultsRow');
+            let visibleCount = 0;
+
+            rows.forEach(row => {
+                const name = row.getAttribute('data-name') || '';
+                if (name.includes(filter)) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            if (noResults) {
+                noResults.style.display = visibleCount === 0 ? '' : 'none';
+            }
+        }
+
+        // ==========================================
+        // EMPLOYEE SEARCH & DIETARY FILTER
+        // ==========================================
+        function setDietFilter(diet) {
+            activeDietFilter = diet;
+            document.querySelectorAll('.filter-chip').forEach(chip => chip.classList.remove('active'));
+            const activeChip = document.getElementById('chip-' + diet);
+            if (activeChip) activeChip.classList.add('active');
+            filterEmployeeMenu();
+        }
+
+        function clearSearch() {
+            const input = document.getElementById('employeeMenuSearch');
+            if (input) {
+                input.value = '';
+                filterEmployeeMenu();
+            }
+        }
+
+        function resetFilters() {
+            const input = document.getElementById('employeeMenuSearch');
+            if (input) input.value = '';
+            setDietFilter('all');
+        }
+
+        function filterEmployeeMenu() {
+            const input = document.getElementById('employeeMenuSearch');
+            const clearBtn = document.getElementById('clearSearchBtn');
+            const filter = input ? input.value.toLowerCase().trim() : '';
+            if (clearBtn) clearBtn.style.display = filter.length > 0 ? 'block' : 'none';
+
+            const items = document.querySelectorAll('.employee-dish-item');
+            const noResults = document.getElementById('empNoResults');
+            let visibleCount = 0;
+
+            items.forEach(item => {
+                const name = item.getAttribute('data-name') || '';
+                const diet = item.getAttribute('data-diet') || 'veg';
+
+                const matchesText = filter === '' || name.includes(filter);
+                const matchesDiet = activeDietFilter === 'all' || 
+                                    (activeDietFilter === 'veg' && diet === 'veg') ||
+                                    (activeDietFilter === 'nonveg' && (diet === 'nonveg' || diet === 'egg'));
+
+                if (matchesText && matchesDiet) {
+                    item.style.display = 'flex';
+                    visibleCount++;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+
+            if (noResults) {
+                noResults.style.display = visibleCount === 0 ? 'block' : 'none';
+            }
+        }
+
+        // ==========================================
+        // QUANTITY ADJUSTMENTS & REALTIME SUMMARY
+        // ==========================================
+        function adjustQty(index, delta, price) {
+            let current = quantities[index] || 0;
+            let next = current + delta;
+            if (next < 0) next = 0;
+            if (next > 20) next = 20;
+
+            quantities[index] = next;
+            const input = document.getElementById('qty_' + index);
+            if (input) input.value = next;
+
+            // Highlight card if selected
+            const card = document.getElementById('dishCard_' + index);
+            if (card) {
+                if (next > 0) {
+                    card.classList.add('selected');
+                } else {
+                    card.classList.remove('selected');
+                }
+            }
+
+            renderTray();
+        }
+
+        function renderTray() {
+            let totalQty = 0;
+            let grandTotal = 0;
+            const trayList = document.getElementById('traySelectedList');
+            const emptyState = document.getElementById('trayEmptyState');
+            const trayBadge = document.getElementById('trayBadgeCount');
+
+            if (!trayList) return;
+
+            let html = '';
+
+            for (let idx in quantities) {
+                let q = quantities[idx];
+                let item = itemData[idx];
+                if (q > 0 && item) {
+                    totalQty += q;
+                    let itemTotal = q * item.price;
+                    grandTotal += itemTotal;
+
+                    html += `
+                        <div style="display: flex; justify-content: space-between; align-items: center; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.55rem 0.75rem;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <span style="font-size: 1rem;">${item.icon}</span>
+                                <div>
+                                    <div style="font-weight: 700; font-size: 0.85rem; color: #0f172a;">${item.name}</div>
+                                    <div style="font-size: 0.75rem; color: #64748b;">${q} × ₹${item.price.toFixed(2)}</div>
+                                </div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <strong style="font-size: 0.9rem; color: #ea580c;">₹${itemTotal.toFixed(2)}</strong>
+                                <button type="button" onclick="adjustQty(${idx}, -${q}, ${item.price})" style="background: none; border: none; color: #94a3b8; font-size: 0.8rem; cursor: pointer; padding: 2px 4px;" title="Remove">✕</button>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+
+            if (totalQty > 0) {
+                trayList.innerHTML = html;
+                trayList.style.display = 'flex';
+                if (emptyState) emptyState.style.display = 'none';
+            } else {
+                trayList.innerHTML = '';
+                trayList.style.display = 'none';
+                if (emptyState) emptyState.style.display = 'block';
+            }
+
+            if (trayBadge) trayBadge.innerText = totalQty + (totalQty === 1 ? ' item' : ' items');
+
+            const totalPortions = document.getElementById('totalPortionsCount');
+            const totalPrice = document.getElementById('totalPriceDisplay');
+            const submitBtn = document.getElementById('submitOrderBtn');
+
+            if (totalPortions) totalPortions.innerText = totalQty + (totalQty === 1 ? ' portion' : ' portions');
+            if (totalPrice) totalPrice.innerText = '₹' + grandTotal.toFixed(2);
+
+            if (submitBtn) {
+                if (totalQty > 0) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = `<span>Place Lunch Order • ₹${grandTotal.toFixed(2)} →</span>`;
+                } else {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<span>Select Dishes to Order</span>';
+                }
+            }
+        }
+
+        function appendNote(text) {
+            const textarea = document.getElementById('specialInstructionsInput');
+            if (!textarea) return;
+            if (textarea.value.trim().length > 0) {
+                if (!textarea.value.includes(text)) {
+                    textarea.value = textarea.value.trim() + ', ' + text;
+                }
+            } else {
+                textarea.value = text;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const searchParam = urlParams.get('search');
+            if (searchParam) {
+                const adminInput = document.getElementById('adminMenuSearch');
+                const empInput = document.getElementById('employeeMenuSearch');
+                if (adminInput) {
+                    adminInput.value = searchParam;
+                    filterAdminMenu();
+                }
+                if (empInput) {
+                    empInput.value = searchParam;
+                    filterEmployeeMenu();
+                }
+            }
+        });
+    </script>
+}

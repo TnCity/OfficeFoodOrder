@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - CityBite Office Catering</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-body: #f8fafc;
+            --bg-card: #ffffff;
+            --primary: #f97316;
+            --primary-hover: #ea580c;
+            --primary-soft: #fff7ed;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --radius-lg: 16px;
+            --radius-md: 10px;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar {
+            background: #ffffff;
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--text-main);
+            text-decoration: none;
+        }
+
+        .brand-icon {
+            background: linear-gradient(135deg, #f97316, #ea580c);
+            color: white;
+            padding: 0.35rem 0.6rem;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-md);
+            transition: all 0.2s ease;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: var(--primary);
+            background: var(--primary-soft);
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+            flex: 1;
+        }
+
+        .alert {
+            padding: 1rem 1.25rem;
+            border-radius: var(--radius-md);
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .alert-success {
+            background-color: #ecfdf5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        .alert-danger {
+            background-color: #fef2f2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.35rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .badge-pending { background: #fef3c7; color: #92400e; }
+        .badge-confirmed { background: #e0f2fe; color: #075985; }
+        .badge-cooking { background: #ffedd5; color: #9a3412; }
+        .badge-ready { background: #f3e8ff; color: #6b21a8; }
+        .badge-delivered { background: #dcfce7; color: #166534; }
+        .badge-cancelled { background: #fee2e2; color: #991b1b; }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.55rem 1.1rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            text-decoration: none;
+            border: none;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-secondary {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            color: var(--text-main);
+        }
+        .btn-secondary:hover {
+            background: #f1f5f9;
+        }
+
+        .btn-sm {
+            padding: 0.35rem 0.75rem;
+            font-size: 0.8rem;
+        }
+
+        .footer {
+            background: #ffffff;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            padding: 1.5rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: auto;
+        }
+    </style>
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body>
+    <header class="navbar">
+        <a href="/" class="brand" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none;">
+            <img src="/images/logo.png" alt="CityBite Logo" style="height: 42px; width: auto; object-fit: contain; border-radius: 8px;" />
+            <span style="display: flex; flex-direction: column; line-height: 1.15;">
+                <span style="font-size: 1.2rem; font-weight: 800; color: #0f172a; letter-spacing: -0.02em;">CityBite</span>
+                <span style="font-size: 0.68rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">Office Lunch Ordering</span>
+            </span>
+        </a>
+        @{
+            var role = Context.Request.Cookies["UserRole"];
+            var userName = Context.Request.Cookies["UserName"];
+            var userIdStr = Context.Request.Cookies["UserId"];
+            bool isLoggedIn = !string.IsNullOrEmpty(userName) && !string.IsNullOrEmpty(userIdStr);
+            bool isUserAdmin = isLoggedIn && (role?.Equals("Admin", StringComparison.OrdinalIgnoreCase) ?? false);
+            bool isEmployee = isLoggedIn && !isUserAdmin;
+        }
+
+        <nav class="nav-links" style="align-items: center;">
+            <a href="/" class="nav-link">🍱 Today's Menu</a>
+
+            @if (isUserAdmin)
+            {
+                <a href="/web/orders" class="nav-link">📋 All Orders</a>
+                <a href="/web/orders/today-summary" class="nav-link">📊 Kitchen Summary</a>
+                <a href="/web/auth/employees" class="nav-link">👥 Employees</a>
+                <a href="/dashboard" class="nav-link">📈 Dashboard</a>
+            }
+            else if (isEmployee)
+            {
+                <a href="/web/orders" class="nav-link">📋 My Orders</a>
+            }
+            
+            <div style="height: 20px; width: 1px; background: var(--border); margin: 0 0.5rem;"></div>
+
+            @if (isLoggedIn)
+            {
+                <span style="font-size: 0.85rem; font-weight: 700; color: var(--text-main);">
+                    @(isUserAdmin ? "👑" : "👤") @userName
+                    <span style="font-size: 0.75rem; font-weight: 600; color: var(--text-muted); background: #f1f5f9; padding: 0.2rem 0.45rem; border-radius: 6px; margin-left: 0.25rem;">
+                        @role
+                    </span>
+                </span>
+                <a href="/web/auth/logout" class="btn btn-secondary btn-sm" style="font-size: 0.78rem;">Logout</a>
+            }
+            else
+            {
+                <a href="/web/auth/login" class="btn btn-secondary btn-sm">Sign In</a>
+                <a href="/web/auth/register" class="btn btn-primary btn-sm">Register</a>
+            }
+
+            @if (isUserAdmin)
+            {
+                <a href="/swagger" target="_blank" class="nav-link" style="color: #94a3b8; font-size: 0.85rem;">API ↗</a>
+            }
+        </nav>
+    </header>
+
+    <main class="container">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success">
+                <span>✔ @TempData["SuccessMessage"]</span>
+            </div>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger">
+                <span>✖ @TempData["ErrorMessage"]</span>
+            </div>
+        }
+
+        @RenderBody()
+    </main>
+
+    <footer class="footer">
+        <p>&copy; @DateTime.Now.Year OfficeBite - Fast & Fresh Office Catering System</p>
+    </footer>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

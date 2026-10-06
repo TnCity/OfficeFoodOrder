@@ -1,0 +1,92 @@
+@model OfficeBite.Shared.DTOs.LoginRequest
+@{
+    ViewData["Title"] = "Sign In";
+}
+
+<div style="max-width: 440px; margin: 2rem auto; background: white; border-radius: 16px; border: 1px solid #e2e8f0; padding: 2rem; box-shadow: 0 4px 25px rgba(0, 0, 0, 0.05);">
+    <div style="text-align: center; margin-bottom: 1.75rem;">
+        <img src="/images/logo.png" alt="CityBite Logo" style="height: 72px; width: auto; object-fit: contain; margin-bottom: 0.75rem; border-radius: 12px;" />
+        <h1 style="font-size: 1.5rem; font-weight: 800; color: #0f172a;">Sign In to CityBite</h1>
+        <p style="color: #64748b; font-size: 0.875rem; margin-top: 0.25rem;">Enter your credentials to access the food ordering portal</p>
+    </div>
+
+    @if (ViewBag.ErrorMessage != null)
+    {
+        <div class="alert alert-danger" style="margin-bottom: 1.25rem;">
+            <span>✖ @ViewBag.ErrorMessage</span>
+        </div>
+    }
+
+    <form asp-action="Login" method="post" id="loginForm" style="display: flex; flex-direction: column; gap: 1.1rem;">
+        @Html.AntiForgeryToken()
+
+        <div>
+            <label style="display: block; font-weight: 600; font-size: 0.85rem; color: #334155; margin-bottom: 0.4rem;">Email Address</label>
+            <input type="email" id="loginEmail" name="Email" value="@Model.Email" required 
+                   style="width: 100%; padding: 0.75rem 1rem; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 0.95rem; outline: none; transition: border 0.2s;" />
+        </div>
+
+        <div>
+            <label style="display: block; font-weight: 600; font-size: 0.85rem; color: #334155; margin-bottom: 0.4rem;">Password</label>
+            <input type="password" id="loginPassword" name="Password" required  
+                   style="width: 100%; padding: 0.75rem 1rem; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 0.95rem; outline: none; transition: border 0.2s;" />
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem;">
+            <label style="display: flex; align-items: center; gap: 0.45rem; color: #475569; cursor: pointer; user-select: none;">
+                <input type="checkbox" name="rememberMe" id="rememberMeCheckbox" value="true" checked style="accent-color: #f97316; width: 16px; height: 16px;" />
+                Remember me on this browser
+            </label>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="padding: 0.75rem; font-size: 1rem; font-weight: 700; width: 100%; margin-top: 0.25rem;">
+            Sign In
+        </button>
+    </form>
+
+    <!-- One-Click Instant Login (No manual typing required) -->
+    @* <div style="margin-top: 1.75rem; border-top: 1px dashed #cbd5e1; padding-top: 1.25rem;">
+        <div style="text-align: center; font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem;">
+            ⚡ Quick 1-Click Sign In
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+            <form asp-action="QuickLogin" asp-route-role="Admin" method="post">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-secondary" style="width: 100%; font-size: 0.82rem; padding: 0.55rem; justify-content: center; font-weight: 700;">
+                    👑 Admin
+                </button>
+            </form>
+            <form asp-action="QuickLogin" asp-route-role="Employee" method="post">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-secondary" style="width: 100%; font-size: 0.82rem; padding: 0.55rem; justify-content: center; font-weight: 700;">
+                    👤 Employee
+                </button>
+            </form>
+        </div>
+    </div> *@
+
+    <div style="text-align: center; margin-top: 1.5rem; font-size: 0.875rem; color: #64748b; border-top: 1px solid #f1f5f9; padding-top: 1rem;">
+        Don't have an account? <a href="/web/auth/register" style="color: var(--primary); font-weight: 600; text-decoration: none;">Register here</a>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const emailInput = document.getElementById('loginEmail');
+            const savedEmail = localStorage.getItem('officebite_remembered_email');
+            if (savedEmail && emailInput && !emailInput.value) {
+                emailInput.value = savedEmail;
+            }
+
+            const loginForm = document.getElementById('loginForm');
+            if (loginForm) {
+                loginForm.addEventListener('submit', function() {
+                    if (emailInput && emailInput.value) {
+                        localStorage.setItem('officebite_remembered_email', emailInput.value);
+                    }
+                });
+            }
+        });
+    </script>
+}

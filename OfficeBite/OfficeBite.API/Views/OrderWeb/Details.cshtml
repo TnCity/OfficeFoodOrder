@@ -1,0 +1,145 @@
+@model OfficeBite.Shared.DTOs.OrderResponseDto
+@{
+    ViewData["Title"] = $"Order #{Model.OrderId} Details";
+    bool isAdmin = ViewBag.IsAdmin ?? true;
+    bool isPending = Model.Status?.Equals("Pending", StringComparison.OrdinalIgnoreCase) ?? false;
+
+    var statusClass = Model.Status?.ToLower() switch
+    {
+        "pending" => "badge-pending",
+        "confirmed" => "badge-confirmed",
+        "cooking" => "badge-cooking",
+        "ready" => "badge-ready",
+        "delivered" => "badge-delivered",
+        "cancelled" => "badge-cancelled",
+        _ => "badge-pending"
+    };
+}
+
+<div style="margin-bottom: 1.5rem;">
+    <a href="/web/orders" style="color: #64748b; text-decoration: none; font-weight: 600; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 0.35rem;">
+        ← Back to @(isAdmin ? "all orders" : "my orders")
+    </a>
+</div>
+
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; align-items: start;">
+    <!-- Order Items & Information -->
+    <div style="background: white; border-radius: 16px; border: 1px solid #e2e8f0; padding: 1.75rem; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; padding-bottom: 1rem; margin-bottom: 1.5rem;">
+            <div>
+                <h1 style="font-size: 1.5rem; font-weight: 800; color: #0f172a;">Order #@Model.OrderId</h1>
+                <p style="color: #64748b; font-size: 0.85rem; margin-top: 0.25rem;">
+                    Placed by <strong style="color: #1e293b;">@Model.UserName</strong> (User #@Model.UserId)
+                </p>
+            </div>
+            <span class="badge @statusClass" style="font-size: 0.85rem; padding: 0.4rem 0.9rem;">@Model.Status</span>
+        </div>
+
+        <h3 style="font-size: 1.1rem; font-weight: 700; color: #1e293b; margin-bottom: 1rem;">Items Ordered</h3>
+        <div style="border: 1px solid #f1f5f9; border-radius: 12px; overflow: hidden; margin-bottom: 1.5rem;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+                <thead>
+                    <tr style="background: #f8fafc; border-bottom: 1px solid #e2e8f0; color: #475569; text-align: left;">
+                        <th style="padding: 0.75rem 1rem;">Item</th>
+                        <th style="padding: 0.75rem 1rem; text-align: center;">Qty</th>
+                        <th style="padding: 0.75rem 1rem; text-align: right;">Unit Price</th>
+                        <th style="padding: 0.75rem 1rem; text-align: right;">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Items)
+                    {
+                        <tr style="border-bottom: 1px solid #f8fafc;">
+                            <td style="padding: 0.75rem 1rem; font-weight: 600; color: #0f172a;">@item.FoodName</td>
+                            <td style="padding: 0.75rem 1rem; text-align: center; color: #475569;">x@item.Quantity</td>
+                            <td style="padding: 0.75rem 1rem; text-align: right; color: #64748b;">₹@item.UnitPrice.ToString("N2")</td>
+                            <td style="padding: 0.75rem 1rem; text-align: right; font-weight: 700; color: #0f172a;">₹@item.TotalPrice.ToString("N2")</td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr style="background: #fff7ed; border-top: 2px solid #fed7aa;">
+                        <td colspan="3" style="padding: 1rem; font-weight: 800; color: #9a3412;">Grand Total</td>
+                        <td style="padding: 1rem; text-align: right; font-weight: 800; font-size: 1.15rem; color: #ea580c;">₹@Model.TotalAmount.ToString("N2")</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(Model.SpecialInstructions))
+        {
+            <div style="background: #f8fafc; border-left: 4px solid #f97316; padding: 1rem 1.25rem; border-radius: 8px;">
+                <div style="font-weight: 700; font-size: 0.85rem; color: #475569; text-transform: uppercase; margin-bottom: 0.25rem;">Special Instructions</div>
+                <div style="color: #1e293b; font-size: 0.95rem;">@Model.SpecialInstructions</div>
+            </div>
+        }
+    </div>
+
+    <!-- Side Actions Panel -->
+    <div style="background: white; border-radius: 16px; border: 1px solid #e2e8f0; padding: 1.75rem; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);">
+        @if (isAdmin)
+        {
+            <!-- ADMIN STATUS CONTROLS -->
+            <h3 style="font-size: 1.1rem; font-weight: 700; color: #1e293b; margin-bottom: 0.4rem;">Update Order Status</h3>
+            <p style="color: #64748b; font-size: 0.85rem; margin-bottom: 1.25rem;">Change the lifecycle status for kitchen and delivery tracking.</p>
+
+            <form asp-action="UpdateStatus" method="post" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="orderId" value="@Model.OrderId" />
+                <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
+
+                <button type="submit" name="status" value="Confirmed" class="btn btn-secondary" style="width: 100%; justify-content: flex-start;">
+                    <span>🔵</span> Confirm Order
+                </button>
+                <button type="submit" name="status" value="Cancelled" class="btn btn-secondary" style="width: 100%; justify-content: flex-start; color: #dc2626;" onclick="return confirm('Are you sure you want to cancel this order?');">
+                    <span>🚫</span> Cancel Order
+                </button>
+                @* <button type="submit" name="status" value="Cooking" class="btn btn-secondary" style="width: 100%; justify-content: flex-start;">
+                    <span>🍳</span> Mark Cooking
+                </button>
+                <button type="submit" name="status" value="Ready" class="btn btn-secondary" style="width: 100%; justify-content: flex-start;">
+                    <span>📦</span> Mark Ready
+                </button> *@
+                <button type="submit" name="status" value="Delivered" class="btn btn-primary" style="width: 100%; justify-content: flex-start;">
+                    <span>✅</span> Mark Delivered
+                </button>
+                
+            </form>
+        }
+        else
+        {
+            <!-- EMPLOYEE ORDER ACTIONS: ONLY EDIT AND CANCEL -->
+            <h3 style="font-size: 1.1rem; font-weight: 700; color: #1e293b; margin-bottom: 0.4rem;">Order Actions</h3>
+            
+            @if (isPending)
+            {
+                <p style="color: #64748b; font-size: 0.85rem; margin-bottom: 1.25rem;">
+                    Your order is currently <strong>Pending</strong>. You can edit your items or cancel before cooking begins.
+                </p>
+
+                <div style="display: flex; flex-direction: column; gap: 0.85rem;">
+                    <a href="/web/orders/edit/@Model.OrderId" class="btn btn-primary" style="width: 100%;">
+                        <span>✏️</span> Edit Order Items
+                    </a>
+
+                    <form asp-action="Cancel" asp-route-id="@Model.OrderId" method="post">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-secondary" style="width: 100%; color: #dc2626; border-color: #fca5a5;" onclick="return confirm('Are you sure you want to cancel and remove this order?');">
+                            <span>🚫</span> Cancel Order
+                        </button>
+                    </form>
+                </div>
+            }
+            else
+            {
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem; text-align: center;">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">👨‍🍳</div>
+                    <div style="font-weight: 700; color: #0f172a; font-size: 0.95rem;">Order is @Model.Status</div>
+                    <p style="color: #64748b; font-size: 0.825rem; margin-top: 0.35rem;">
+                        This order has been processed by the kitchen and can no longer be modified or cancelled.
+                    </p>
+                </div>
+            }
+        }
+    </div>
+</div>

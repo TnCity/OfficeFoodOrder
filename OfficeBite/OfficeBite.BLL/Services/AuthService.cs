@@ -89,4 +89,46 @@ public class AuthService
             })
             .ToListAsync();
     }
+
+    public async Task<bool> ToggleUserRoleAsync(int userId)
+    {
+        var user = await _context.Users.FindAsync(userId);
+        if (user == null) return false;
+
+        user.Role = user.Role.Equals("Admin", StringComparison.OrdinalIgnoreCase) ? "Employee" : "Admin";
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task EnsureAdminUsersAsync()
+    {
+        // Automatically ensure any user with sanjeeb/sanjeem in name or email is an Admin
+        var adminCandidates = await _context.Users
+            .Where(u => u.Role != "Admin" &&
+                (u.FullName.ToLower().Contains("sanjeeb") ||
+                 u.FullName.ToLower().Contains("sanjeem") ||
+                 u.Email.ToLower().Contains("sanjeeb") ||
+                 u.Email.ToLower().Contains("sanjeem") ||
+                 u.Email.ToLower().Contains("admin")))
+            .ToListAsync();
+
+        if (adminCandidates.Any())
+        {
+            foreach (var user in adminCandidates)
+            {
+                user.Role = "Admin";
+            }
+            await _context.SaveChangesAsync();
+        }
+    }
+
+    public async Task<User?> GetUserByIdAsync(int userId)
+    {
+        return await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
+    }
+
+    public async Task<User?> GetFirstUserByRoleAsync(string role)
+    {
+        return await _context.Users.FirstOrDefaultAsync(u => u.Role == role && u.IsActive);
+    }
 }
