@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using OfficeBite.BLL.Services;
 using OfficeBite.Shared.DTOs;
+using OfficeBite.Shared.Helpers;
 
 namespace OfficeBite.API.Controllers;
 
@@ -177,6 +178,12 @@ public class OrderWebController : Controller
             return RedirectToAction(nameof(Index));
         }
 
+        if (!ctx.IsAdmin && DateTimeHelper.IsOrderTimeOver())
+        {
+            TempData["ErrorMessage"] = "Time is Over, Call Sanjeeb";
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
         if (order.Status != "Pending")
         {
             TempData["ErrorMessage"] = $"Order #{id} is '{order.Status}' and cannot be modified.";
@@ -213,6 +220,12 @@ public class OrderWebController : Controller
         {
             TempData["ErrorMessage"] = "Please sign in.";
             return RedirectToAction("Login", "AuthWeb");
+        }
+
+        if (!ctx.IsAdmin && DateTimeHelper.IsOrderTimeOver())
+        {
+            TempData["ErrorMessage"] = "Time is Over, Call Sanjeeb";
+            return RedirectToAction(nameof(Details), new { id });
         }
 
         try
@@ -260,6 +273,12 @@ public class OrderWebController : Controller
         {
             TempData["ErrorMessage"] = "Please sign in.";
             return RedirectToAction("Login", "AuthWeb");
+        }
+
+        if (!ctx.IsAdmin && DateTimeHelper.IsOrderTimeOver())
+        {
+            TempData["ErrorMessage"] = "Time is Over, Call Sanjeeb";
+            return RedirectToAction(nameof(Index));
         }
 
         try

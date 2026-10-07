@@ -1,3 +1,4 @@
+using OfficeBite.Mobile.Helpers;
 using OfficeBite.Mobile.Models;
 using OfficeBite.Mobile.Services;
 
@@ -19,7 +20,10 @@ public partial class TodayMenuPage : ContentPage
 
     private void LoadMenu()
     {
-        MenuTitleLabel.Text = _menu.Title;
+        MenuTitleLabel.Text = DateTimeHelper.IsOrderTimeOver()
+            ? "⛔ Time is Over, Call Sanjeeb"
+            : _menu.Title;
+
         _items = _menu.Items
             .Where(i => i.IsAvailable)
             .Select(i => new MenuItemDto
@@ -39,6 +43,12 @@ public partial class TodayMenuPage : ContentPage
 
     private void PlusButton_Clicked(object sender, EventArgs e)
     {
+        if (DateTimeHelper.IsOrderTimeOver())
+        {
+            DisplayAlert("Ordering Closed", "Time is Over, Call Sanjeeb", "OK");
+            return;
+        }
+
         if (sender is Button btn && btn.CommandParameter is MenuItemDto item)
         {
             item.Quantity++;
@@ -72,10 +82,21 @@ public partial class TodayMenuPage : ContentPage
         var total    = selected.Sum(i => i.ItemTotal);
         var count    = selected.Sum(i => i.Quantity);
         CartTotalLabel.Text = $"Rs.{total:0}  ({count} item{(count == 1 ? "" : "s")})";
-        ConfirmOrderButton.IsEnabled     = selected.Count > 0;
-        ConfirmOrderButton.BackgroundColor = selected.Count > 0
-            ? Color.FromArgb("#4F46E5")
-            : Color.FromArgb("#9CA3AF");
+
+        if (DateTimeHelper.IsOrderTimeOver())
+        {
+            ConfirmOrderButton.Text = "Time is Over, Call Sanjeeb";
+            ConfirmOrderButton.IsEnabled = false;
+            ConfirmOrderButton.BackgroundColor = Color.FromArgb("#EF4444");
+        }
+        else
+        {
+            ConfirmOrderButton.Text = "Review Order →";
+            ConfirmOrderButton.IsEnabled     = selected.Count > 0;
+            ConfirmOrderButton.BackgroundColor = selected.Count > 0
+                ? Color.FromArgb("#4F46E5")
+                : Color.FromArgb("#9CA3AF");
+        }
     }
 
     private async void BackButton_Clicked(object sender, EventArgs e)
@@ -91,6 +112,12 @@ public partial class TodayMenuPage : ContentPage
 
     private async void ConfirmOrderButton_Clicked(object sender, EventArgs e)
     {
+        if (DateTimeHelper.IsOrderTimeOver())
+        {
+            await DisplayAlert("Ordering Closed", "Time is Over, Call Sanjeeb", "OK");
+            return;
+        }
+
         var selected = _items.Where(i => i.Quantity > 0).ToList();
         if (selected.Count == 0) return;
         await Navigation.PushAsync(new ConfirmOrderPage(_apiService, _menu, selected));

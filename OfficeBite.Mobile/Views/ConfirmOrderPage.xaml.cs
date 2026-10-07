@@ -1,3 +1,4 @@
+using OfficeBite.Mobile.Helpers;
 using OfficeBite.Mobile.Models;
 using OfficeBite.Mobile.Services;
 
@@ -38,6 +39,12 @@ public partial class ConfirmOrderPage : ContentPage
 
     private async void PlaceOrderButton_Clicked(object sender, EventArgs e)
     {
+        if (DateTimeHelper.IsOrderTimeOver())
+        {
+            await DisplayAlert("Ordering Closed", "Time is Over, Call Sanjeeb", "OK");
+            return;
+        }
+
         bool confirm = await DisplayAlert("Place Order",
             "Are you sure you want to place this order?", "Yes, Place Order", "Cancel");
         if (!confirm) return;

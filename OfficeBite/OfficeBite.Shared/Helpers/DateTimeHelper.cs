@@ -28,4 +28,20 @@ public static class DateTimeHelper
             return dt.ToUniversalTime().Add(IstOffset);
         return dt.Add(IstOffset);
     }
+
+    /// <summary>
+    /// Daily ordering cutoff time in IST (1:00 PM).
+    /// </summary>
+    public static readonly TimeOnly OrderCutoffTime = new TimeOnly(13, 0);
+
+    public const string OrderTimeOverMessage = "Time is Over, Call Sanjeeb";
+
+    /// <summary>
+    /// Returns true if current Indian Standard Time is at or after the 1:00 PM cutoff.
+    /// </summary>
+    public static bool IsOrderTimeOver()
+    {
+        var time = TimeOnly.FromDateTime(NowIst);
+        return time >= OrderCutoffTime;
+    }
 }

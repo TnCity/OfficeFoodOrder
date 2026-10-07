@@ -24,6 +24,11 @@ public class OrderService
         int userId,
         CreateOrderRequest request)
     {
+        if (DateTimeHelper.IsOrderTimeOver())
+        {
+            throw new InvalidOperationException("Time is Over, Call Sanjeeb");
+        }
+
         if (request.Items == null ||
             request.Items.Count == 0)
         {
@@ -142,6 +147,11 @@ public class OrderService
         int orderId,
         CreateOrderRequest request)
     {
+        if (DateTimeHelper.IsOrderTimeOver())
+        {
+            throw new InvalidOperationException("Time is Over, Call Sanjeeb");
+        }
+
         if (request.Items == null || request.Items.Count == 0)
         {
             throw new ArgumentException("Please select at least one food item.");
@@ -218,6 +228,11 @@ public class OrderService
 
     public async Task<bool> DeleteOrderAsync(int userId, int orderId)
     {
+        if (DateTimeHelper.IsOrderTimeOver())
+        {
+            throw new InvalidOperationException("Time is Over, Call Sanjeeb");
+        }
+
         var order = await _context.Orders
             .Include(x => x.OrderItems)
             .FirstOrDefaultAsync(x => x.OrderId == orderId && x.UserId == userId);

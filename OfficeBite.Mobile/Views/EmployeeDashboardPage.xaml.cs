@@ -83,8 +83,16 @@ public partial class EmployeeDashboardPage : ContentPage
             MenuSectionTitleLabel.IsVisible = true;
             MenuTitleLabel.Text             = _todayMenu.Title;
 
-            OrderingBadge.BackgroundColor = Color.FromArgb("#10B981");
-            OrderingBadgeLabel.Text       = "Available Today";
+            if (DateTimeHelper.IsOrderTimeOver())
+            {
+                OrderingBadge.BackgroundColor = Color.FromArgb("#EF4444");
+                OrderingBadgeLabel.Text       = "⛔ Time is Over, Call Sanjeeb";
+            }
+            else
+            {
+                OrderingBadge.BackgroundColor = Color.FromArgb("#10B981");
+                OrderingBadgeLabel.Text       = "Available Today";
+            }
 
             // If not actively modifying, build menu items fresh (only active items shown to employees)
             if (!_isModifyingOrder)
@@ -206,6 +214,12 @@ public partial class EmployeeDashboardPage : ContentPage
 
     private async void DeleteOrderBtn_Clicked(object sender, EventArgs e)
     {
+        if (DateTimeHelper.IsOrderTimeOver())
+        {
+            await DisplayAlert("Ordering Closed", "Time is Over, Call Sanjeeb", "OK");
+            return;
+        }
+
         if (_activeTodayOrder == null || _activeTodayOrder.Status != "Pending")
         {
             await DisplayAlert("Cannot Delete", "Order is already accepted by Admin and cannot be deleted.", "OK");
@@ -250,6 +264,12 @@ public partial class EmployeeDashboardPage : ContentPage
 
     private void ModifyOrderBtn_Clicked(object sender, EventArgs e)
     {
+        if (DateTimeHelper.IsOrderTimeOver())
+        {
+            DisplayAlert("Ordering Closed", "Time is Over, Call Sanjeeb", "OK");
+            return;
+        }
+
         if (_todayMenu == null || _activeTodayOrder == null || _activeTodayOrder.Status != "Pending")
         {
             DisplayAlert("Cannot Modify", "Order is already accepted by Admin and cannot be modified.", "OK");
@@ -605,6 +625,12 @@ public partial class EmployeeDashboardPage : ContentPage
 
     private async void PlaceOrderButton_Clicked(object sender, EventArgs e)
     {
+        if (DateTimeHelper.IsOrderTimeOver())
+        {
+            await DisplayAlert("Ordering Closed", "Time is Over, Call Sanjeeb", "OK");
+            return;
+        }
+
         if (_todayMenu == null) return;
 
         var selected = _menuItems.Where(i => i.Quantity > 0).ToList();
