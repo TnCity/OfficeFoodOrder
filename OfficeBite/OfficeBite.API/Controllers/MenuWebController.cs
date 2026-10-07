@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using OfficeBite.BLL.Services;
 using OfficeBite.Shared.DTOs;
+using OfficeBite.Shared.Helpers;
 
 namespace OfficeBite.API.Controllers;
 
@@ -140,6 +141,12 @@ public class MenuWebController : Controller
             return RedirectToAction("Login", "AuthWeb");
         }
 
+        if (!ctx.IsAdmin && DateTimeHelper.IsOrderTimeOver())
+        {
+            TempData["ErrorMessage"] = "Time is Over, Call Sanjeeb";
+            return RedirectToAction(nameof(Index));
+        }
+
         try
         {
             // Filter only items with quantity > 0
@@ -188,6 +195,12 @@ public class MenuWebController : Controller
         {
             TempData["ErrorMessage"] = "Please sign in.";
             return RedirectToAction("Login", "AuthWeb");
+        }
+
+        if (!ctx.IsAdmin && DateTimeHelper.IsOrderTimeOver())
+        {
+            TempData["ErrorMessage"] = "Time is Over, Call Sanjeeb";
+            return RedirectToAction(nameof(Index));
         }
 
         try

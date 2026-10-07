@@ -204,13 +204,15 @@ public class MenuService
             await _context.SaveChangesAsync();
         }
 
+        var isTimeOver = DateTimeHelper.IsOrderTimeOver();
+
         var dto = new MenuResponseDto
         {
             MenuId = menu.MenuId,
             MenuDate = menu.MenuDate,
             Title = menu.Title,
             IsPublished = menu.IsPublished,
-            IsOrderingOpen = true,
+            IsOrderingOpen = !isTimeOver,
             OrderStartTime = menu.OrderStartTime,
             OrderEndTime = menu.OrderEndTime,
             Items = menu.MenuItems
